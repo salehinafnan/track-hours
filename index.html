@@ -1,0 +1,3955 @@
+<!doctype html>
+<html lang="en" data-theme="midnight" style="font-size: clamp(15px, 1.1vw, 26px);">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <title>Work Hour Tracker</title>
+
+  <!-- Google Fonts Link -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Inline Vector Icon (SVG Clock) -->
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2360a5fa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'></circle><polyline points='12 6 12 12 16 14'></polyline></svg>">
+
+  <style>
+    /* =========================================================================
+       1. GLOBAL BASE STYLES & VARIABLE CONFIGURATION
+       ========================================================================= */
+    :root {
+      /* Shared Color Scheme Accents */
+      --accent-work: #4ade80;
+      --accent-break: #f87171;
+      --accent-blue: #60a5fa;
+      --accent-warning: #f59e0b;
+    }
+
+    /* =========================================================================
+       2. PREMIUM NOIR THEME (MIDNIGHT)
+       ========================================================================= */
+    :root[data-theme="midnight"] {
+      --page-bg: #000000;
+      --panel-bg: rgba(15, 15, 15, 0.7);
+      --panel-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 30px 60px rgba(0, 0, 0, 0.9);
+      --panel-blur: blur(28px) saturate(160%);
+
+      --element-bg: rgba(255, 255, 255, 0.03);
+      --element-hover: rgba(255, 255, 255, 0.08);
+      --element-bg-light: #ffffff;
+
+      --border-main: rgba(255, 255, 255, 0.08);
+      --border-light: rgba(255, 255, 255, 0.15);
+
+      --text-main: #ffffff;
+      --text-muted: #71717a;
+
+      --btn-work-bg: rgba(74, 222, 128, 0.08);
+      --btn-work-border: rgba(74, 222, 128, 0.2);
+      --btn-work-text: #4ade80;
+
+      --btn-break-bg: rgba(248, 113, 113, 0.08);
+      --btn-break-border: rgba(248, 113, 113, 0.2);
+      --btn-break-text: #f87171;
+
+      --btn-log-bg: #ffffff;
+      --btn-log-text: #000000;
+      --btn-log-border: #ffffff;
+
+      --dropdown-bg: #0a0a0a;
+      --modal-bg: #0a0a0a;
+    }
+
+    /* =========================================================================
+       3. MODERN GLASSMORPHISM THEME (GLASS)
+       ========================================================================= */
+    :root[data-theme="glass"] {
+      --page-bg:
+        radial-gradient(at 0% 0%, #1e293b 0%, transparent 50%),
+        radial-gradient(at 100% 0%, #334155 0%, transparent 50%),
+        radial-gradient(at 100% 100%, #0f172a 0%, transparent 50%),
+        radial-gradient(at 0% 100%, #1e1b4b 0%, transparent 50%), #020617;
+      --panel-bg: rgba(255, 255, 255, 0.05);
+      --panel-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+      --panel-blur: blur(18px) saturate(180%);
+
+      --element-bg: rgba(0, 0, 0, 0.2);
+      --element-hover: rgba(255, 255, 255, 0.1);
+      --element-bg-light: #ffffff;
+
+      --border-main: rgba(255, 255, 255, 0.15);
+      --border-light: rgba(255, 255, 255, 0.3);
+
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+
+      --btn-work-bg: #4ade80;
+      --btn-work-border: transparent;
+      --btn-work-text: #052e16;
+
+      --btn-break-bg: #f87171;
+      --btn-break-border: transparent;
+      --btn-break-text: #450a0a;
+
+      --btn-log-bg: #ffffff;
+      --btn-log-text: #000000;
+      --btn-log-border: #ffffff;
+
+      --dropdown-bg: #0f172a;
+      --modal-bg: #0f172a;
+    }
+
+    /* =========================================================================
+       4. RESET & UTILITY LAYOUT
+       ========================================================================= */
+    * {
+      box-sizing: border-box;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: transparent;
+      border-radius: 10px;
+    }
+
+    .tab-content:hover::-webkit-scrollbar-thumb,
+    #note-text:hover::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    ::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      cursor: pointer;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--page-bg);
+      background-attachment: fixed;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Monospaced Data Styling for Alignment Precision */
+    .timer-val,
+    .status-time span,
+    .goal-inputs input,
+    .log-bottom-left,
+    .stat-val,
+    .breakdown-row span,
+    .log-top-left span,
+    #progress-text,
+    #avg-weekly-work,
+    #avg-weekly-break,
+    .tz-select {
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    /* =========================================================================
+       5. MAIN CONTAINER & CONSOLE LAYOUT
+       ========================================================================= */
+    .console-panel {
+      width: 92%;
+      max-width: 90rem;
+      height: 85vh;
+      background: var(--panel-bg);
+      backdrop-filter: var(--panel-blur);
+      -webkit-backdrop-filter: var(--panel-blur);
+      border: 1px solid var(--border-main);
+      border-radius: 1.5rem;
+      box-shadow: var(--panel-shadow);
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 2.2rem;
+      padding: 2.2rem;
+    }
+
+    .main-ui {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      flex: 1;
+      justify-content: space-around;
+      min-height: 0;
+    }
+
+    /* =========================================================================
+       6. HEADER STATUS BAR & CONTROL ELEMENTS
+       ========================================================================= */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+      flex-wrap: nowrap;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      background: var(--element-bg);
+      border: 1px solid var(--border-main);
+      padding: 0.5rem 1rem;
+      border-radius: 1rem;
+      box-shadow: 0 0.25rem 0.4rem rgba(0, 0, 0, 0.15);
+    }
+
+    .theme-toggle-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--element-bg);
+      border: 1px solid var(--border-main);
+      padding: 0.5rem 1rem;
+      border-radius: 1rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      box-shadow: 0 0.25rem 0.4rem rgba(0, 0, 0, 0.15);
+      transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s ease;
+      outline: none;
+      overflow: hidden;
+    }
+
+    #theme-toggle-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+    }
+
+    .theme-switching {
+      transform: rotate(360deg) scale(0);
+      opacity: 0;
+    }
+
+    .theme-toggle-btn:hover {
+      background: var(--element-hover);
+      border-color: var(--border-light);
+      color: var(--text-main);
+    }
+
+    .status-time {
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .status-time span {
+      color: var(--text-main);
+      font-size: 1.05rem;
+      margin: 0 0.4rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tz-select {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--accent-blue);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      outline: none;
+      transition: background 0.2s, border-color 0.2s;
+      margin-right: 0.25rem;
+    }
+
+    .tz-select:hover {
+      background: var(--element-hover);
+      border-color: var(--border-main);
+    }
+
+    .tz-select option {
+      background: var(--dropdown-bg);
+      color: var(--text-main);
+    }
+
+    .goal-inputs {
+      gap: 0.1rem;
+      white-space: nowrap;
+    }
+
+    .goal-inputs span.label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-right: 0.4rem;
+      font-weight: 600;
+    }
+
+    .goal-inputs span.unit {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-left: 0.1rem;
+      margin-right: 0.4rem;
+      font-weight: 600;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      appearance: none;
+      margin: 0;
+    }
+
+    .goal-inputs input[type="number"] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 1.05rem;
+      width: 2rem;
+      text-align: center;
+      outline: none;
+      padding: 0.1rem 0;
+      border-radius: 0.4rem;
+      transition: background 0.2s, border-color 0.2s;
+      cursor: pointer;
+    }
+
+    .goal-inputs input[type="number"]:hover,
+    .goal-inputs input[type="number"]:focus {
+      background: var(--element-hover);
+      border-color: var(--border-main);
+      cursor: text;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="number"].filter-input {
+      -moz-appearance: textfield;
+      appearance: textfield;
+      background: var(--element-bg);
+      border: 1px solid var(--border-main);
+      color: var(--text-main);
+      padding: 0.3rem 0.5rem;
+      border-radius: 0.5rem;
+      font-family: inherit;
+      outline: none;
+      text-align: center;
+      font-size: 0.8rem;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    input[type="number"].filter-input:focus {
+      border-color: var(--border-light);
+    }
+
+    input[type="date"] {
+      text-align: left;
+      padding: 0.3rem 0.75rem;
+      cursor: pointer;
+    }
+
+    .label-xs {
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
+
+    /* =========================================================================
+       7. TIMERS & PROGRESS GAUGES
+       ========================================================================= */
+    .timers-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin: 2.5rem 0;
+    }
+
+    .timer-val {
+      font-size: clamp(3.5rem, 10vw, 6rem);
+      line-height: 0.85;
+      font-weight: 700;
+      letter-spacing: -0.05em;
+      margin-bottom: 0.6rem;
+      transition: color 0.3s ease, text-shadow 0.3s ease;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #break-timer {
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      margin-bottom: 1rem;
+      letter-spacing: -0.03em;
+      opacity: 0.9;
+    }
+
+    .progress-rail {
+      height: 6px;
+      background: var(--element-bg);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 15px 0;
+      border: 1px solid rgba(255, 255, 255, 0.02);
+    }
+
+    #progress-fill {
+      height: 100%;
+      width: 100%;
+      transform: scaleX(0);
+      transform-origin: left;
+      background: var(--accent-blue);
+      box-shadow: 0 0 10px color-mix(in srgb, var(--accent-blue) 40%, transparent);
+      transition: transform 0.5s ease, background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* =========================================================================
+       8. BUTTONS & ACTIONS
+       ========================================================================= */
+    .actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 0;
+      min-height: 55px;
+    }
+
+    .actions button {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      height: 3.75rem;
+      box-shadow: 0 0.6rem 1.25rem rgba(0, 0, 0, 0.2);
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+      border-radius: 1rem;
+    }
+
+    button {
+      border: none;
+      border-radius: 16px;
+      padding: 16px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, filter 0.2s ease, background 0.3s ease, border-color 0.2s;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      filter: saturate(0.5);
+    }
+
+    .btn-work {
+      background: var(--btn-work-bg);
+      color: var(--btn-work-text);
+      border: 1px solid var(--btn-work-border);
+    }
+
+    .btn-work:hover:not(:disabled) {
+      filter: brightness(1.2);
+    }
+
+    .btn-break {
+      background: var(--btn-break-bg);
+      color: var(--btn-break-text);
+      border: 1px solid var(--btn-break-border);
+    }
+
+    .btn-break:hover:not(:disabled) {
+      filter: brightness(1.2);
+    }
+
+    .btn-log {
+      grid-column: span 2;
+      background: var(--btn-log-bg);
+      color: var(--btn-log-text);
+      border: 1px solid var(--btn-log-border);
+    }
+
+    .btn-log:hover:not(:disabled) {
+      filter: brightness(0.9);
+    }
+
+    /* =========================================================================
+       9. SIDEBAR LAYOUT & TABS
+       ========================================================================= */
+    .sidebar {
+      border-left: 1px solid var(--border-main);
+      padding-left: 30px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .tab-nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      background: var(--element-bg);
+      padding: 5px;
+      border-radius: 12px;
+      border: 1px solid var(--border-main);
+      flex-shrink: 0;
+      margin-right: 10px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+      text-align: center;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      background: var(--element-hover);
+      color: var(--text-main);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-light);
+    }
+
+    .tab-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 10px;
+    }
+
+    .logbook-controls-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.9375rem;
+      flex-shrink: 0;
+    }
+
+    .header-icon-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+    }
+
+    .header-icon-btn:hover,
+    .header-icon-btn.active {
+      color: var(--text-main);
+    }
+
+    .advanced-filters {
+      display: none;
+      flex-direction: column;
+      background: var(--element-bg);
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid var(--border-main);
+      margin-bottom: 15px;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .header-icon-btn.filter-active {
+      background: rgba(96, 165, 250, 0.1);
+      color: var(--accent-blue) !important;
+      border: 1px solid rgba(96, 165, 250, 0.3);
+    }
+
+    .advanced-filters.show {
+      display: flex;
+    }
+
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-select {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-main);
+      color: var(--text-main);
+      padding: 6px 10px;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .filter-select:hover {
+      border-color: var(--border-light);
+    }
+
+    .filter-select option {
+      background: var(--dropdown-bg);
+    }
+
+    .filter-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .filter-checkbox-label input {
+      cursor: pointer;
+      width: 14px;
+      height: 14px;
+      accent-color: var(--accent-blue);
+    }
+
+    .clear-filter-btn {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-main);
+      padding: 5px 12px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      margin-left: auto;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .clear-filter-btn:hover {
+      color: var(--text-main);
+      background: var(--element-hover);
+      border-color: var(--border-light);
+    }
+
+    /* =========================================================================
+       10. LOGBOOK & VIRTUAL LIST ENGINE STYLE
+       ========================================================================= */
+    .log-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-rows: auto auto;
+      row-gap: 0.15rem;
+      column-gap: 0.75rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.75rem;
+      background: var(--element-bg);
+      border: 1px solid var(--border-main);
+      contain: layout paint;
+      position: absolute;
+      width: 100%;
+      height: 4.2rem;
+      margin-bottom: 0;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #log-container {
+      position: relative;
+      width: 100%;
+    }
+
+    .log-top-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .log-top-left strong {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .log-top-left span {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .log-top-right {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .log-bottom-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.75rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+    }
+
+    .log-bottom-left span.stat-label {
+      font-weight: 700;
+      margin-right: 4px;
+    }
+
+    .log-bottom-right {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      border-radius: 5px;
+      padding: 4px 6px;
+      text-align: center;
+      white-space: nowrap;
+      min-width: 60px;
+    }
+
+    .tag-over {
+      background: rgba(74, 222, 128, 0.1);
+      color: var(--accent-work);
+      border: 1px solid rgba(74, 222, 128, 0.2);
+    }
+
+    .tag-under {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--accent-warning);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .icon-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-main);
+      color: var(--text-muted);
+      border-radius: 8px;
+      padding: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s, background 0.2s, border-color 0.2s;
+    }
+
+    .icon-btn:hover:not(:disabled) {
+      color: var(--text-main);
+      background: var(--element-hover);
+      border-color: var(--border-light);
+    }
+
+    .icon-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .note-active svg {
+      color: var(--accent-blue);
+    }
+
+    .danger-text:hover {
+      color: var(--accent-break) !important;
+      border-color: rgba(248, 113, 113, 0.3) !important;
+      background: rgba(248, 113, 113, 0.1) !important;
+    }
+
+    /* =========================================================================
+       11. SIDEBAR FOOTER & DATA MANAGEMENT
+       ========================================================================= */
+    .sidebar-footer {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      margin-right: 10px;
+    }
+
+    .footer-text {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .footer-text strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .footer-icons {
+      display: flex;
+      gap: 6px;
+    }
+
+    .sq-btn {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: 10px;
+    }
+
+    .sq-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* =========================================================================
+       12. STATS CARDS & WEEKLY SEGMENTED PROGRESS PROGRESS BAR
+       ========================================================================= */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    .stat-card {
+      background: var(--element-bg);
+      border: 1px solid var(--border-main);
+      border-radius: 12px;
+      padding: 10px;
+      contain: layout paint;
+    }
+
+    .stat-val {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .nav-arrow {
+      cursor: pointer;
+      user-select: none;
+      padding: 0 6px;
+      color: var(--text-muted);
+      font-weight: bold;
+      transition: color 0.2s;
+      font-size: 1rem;
+    }
+
+    .nav-arrow:hover {
+      color: var(--text-main);
+    }
+
+    #week-month-label {
+      font-size: 0.85rem;
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    #weekly-breakdown {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      font-size: 0.75rem;
+      border-bottom: 1px solid var(--border-main);
+      font-variant-numeric: tabular-nums;
+      flex: 1;
+    }
+
+    .breakdown-row:last-child {
+      border-bottom: none;
+    }
+
+    .segmented-progress-bar {
+      display: flex;
+      gap: 4px;
+      width: 100%;
+    }
+
+    .progress-segment {
+      flex: 1;
+      height: 16px;
+      background-color: var(--element-bg);
+      border: 1px solid var(--border-main);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-segment-fill {
+      height: 100%;
+      width: 100%;
+      transform: scaleX(0);
+      transform-origin: left;
+      background: linear-gradient(135deg, var(--accent-blue) 0%, #4f46e5 100%);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .progress-segment.is-today {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 8px color-mix(in srgb, var(--accent-blue) 20%, transparent);
+    }
+
+    #weekly-progress-card.goal-reached .progress-segment-fill {
+      background: linear-gradient(135deg, #4ade80 0%, #0d9488 100%);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    }
+
+    #weekly-progress-card.goal-reached .progress-segment.is-today {
+      border-color: var(--accent-work);
+      box-shadow: 0 0 8px color-mix(in srgb, var(--accent-work) 20%, transparent);
+    }
+
+    /* =========================================================================
+       13. MODALS, TOASTS & RESPONSIVE BREAKPOINTS
+       ========================================================================= */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10, 10, 10, 0.85);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-container {
+      width: 100%;
+      max-width: 400px;
+      background: var(--modal-bg);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9);
+    }
+
+    .modal-container h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    #undo-toast {
+      position: fixed;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--modal-bg);
+      border: 1px solid var(--border-main);
+      color: var(--text-main);
+      padding: 8px 8px 8px 24px;
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      z-index: 3000;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      backdrop-filter: var(--panel-blur);
+      -webkit-backdrop-filter: var(--panel-blur);
+    }
+
+    #undo-btn {
+      background: var(--accent-blue);
+      border: none;
+      cursor: pointer;
+      color: #000000;
+      padding: 8px 20px;
+      border-radius: 100px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      transition: transform 0.2s, filter 0.2s;
+    }
+
+    #undo-btn:hover {
+      filter: brightness(1.1);
+      transform: scale(1.05);
+    }
+
+    #sync-toast {
+      position: fixed;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--modal-bg);
+      border: 1px solid var(--accent-warning);
+      color: var(--accent-warning);
+      padding: 10px 20px;
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      z-index: 3000;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      backdrop-filter: var(--panel-blur);
+      -webkit-backdrop-filter: var(--panel-blur);
+    }
+
+    /* Screen Adaptive Media Queries */
+    @media (max-width: 900px) {
+      body {
+        overflow: auto;
+        align-items: flex-start;
+      }
+
+      .console-panel {
+        grid-template-columns: 1fr;
+        padding: 25px;
+        height: auto;
+        min-height: auto;
+        max-height: none;
+      }
+
+      .main-ui,
+      .sidebar {
+        height: auto;
+      }
+
+      .sidebar {
+        border-left: none;
+        padding-left: 0;
+      }
+
+      .status-bar {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+      }
+
+      .sidebar-footer {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- =========================================================================
+       DYNAMIC APPLICATION NOTIFICATIONS & ALERTS
+       ========================================================================= -->
+  <!-- Undo EOD Submission Toast Notification -->
+  <div id="undo-toast">
+    Shift Logged Successfully
+    <button id="undo-btn">Undo</button>
+  </div>
+
+  <!-- Idle Lockout Detection Overlay Modal -->
+  <div id="idle-modal" class="modal-overlay">
+    <div class="modal-container">
+      <h3 style="color: var(--accent-warning); margin-top: 0; margin-bottom: 15px; font-size: 1.1rem;">
+        Idle Detected
+      </h3>
+      <div style="margin-bottom: 20px; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+        You were away for
+        <span id="idle-duration-text"
+          style="color: var(--text-main); font-weight: bold; font-family: 'JetBrains Mono', monospace;"></span>. Where
+        should this time go?
+      </div>
+      <div style="display: flex; gap: 10px">
+        <button class="btn-work" style="flex: 1; padding: 12px; border-radius: 12px; font-weight: 600"
+          onclick="resolveIdle('work')">
+          Log as Work
+        </button>
+        <button class="btn-break" style="flex: 1; padding: 12px; border-radius: 12px; font-weight: 600"
+          onclick="resolveIdle('break')">
+          Log as Break
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Micro-Shift Alert Modal (Ghost Filter) -->
+  <div id="ghost-modal" class="modal-overlay">
+    <div class="modal-container">
+      <h3 style="color: var(--accent-warning); margin-top: 0; margin-bottom: 15px; font-size: 1.1rem;">
+        Short Shift Detected
+      </h3>
+      <div style="margin-bottom: 20px; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+        This shift is under 60 seconds. Are you sure you want to log it?
+      </div>
+      <div style="display: flex; gap: 10px">
+        <button class="btn-secondary" style="
+              flex: 1;
+              padding: 12px;
+              background: transparent;
+              border: 1px solid var(--border-light);
+              color: var(--text-main);
+              border-radius: 12px;
+            " onclick="closeGhostModal()">
+          Cancel
+        </button>
+        <button class="btn-log" style="
+              flex: 1;
+              padding: 12px;
+              background: rgba(245, 158, 11, 0.1);
+              color: var(--accent-warning);
+              border: 1px solid rgba(245, 158, 11, 0.3);
+              border-radius: 12px;
+              font-weight: 600;
+            " onclick="confirmGhost()">
+          Log Anyway
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- End of Day Note & Submission Modal -->
+  <div id="submit-modal" class="modal-overlay">
+    <div class="modal-container">
+      <h3>End of Day Submission</h3>
+      <div class="label-xs">Tasks Completed / Shift Notes (Optional)</div>
+      <input type="text" id="modal-shift-notes" list="note-suggestions" placeholder="Enter notes here..." style="
+            width: 100%;
+            margin-bottom: 20px;
+            text-align: left;
+            padding: 10px;
+            font-size: 0.85rem;
+          " />
+      <datalist id="note-suggestions"></datalist>
+
+      <div style="display: flex; gap: 10px">
+        <button class="btn-secondary" style="
+              flex: 1;
+              padding: 12px;
+              background: transparent;
+              border: 1px solid var(--border-light);
+              color: var(--text-main);
+              border-radius: 12px;
+            " onclick="closeSubmitModal()">
+          Cancel
+        </button>
+        <button class="btn-log" style="
+              flex: 1;
+              padding: 12px;
+              background: var(--btn-log-bg);
+              color: var(--btn-log-text);
+              border: 1px solid var(--btn-log-border);
+              border-radius: 12px;
+              font-weight: 600;
+            " onclick="confirmSubmit()">
+          Confirm EOD
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cross-Tab Instance Conflict Warning Modal -->
+  <div id="tab-conflict-modal" class="modal-overlay" style="z-index: 9999; background: var(--page-bg);">
+    <div class="modal-container" style="text-align: center; border: 1px solid var(--accent-break);">
+      <h1 style="font-size: 3rem; margin-bottom: 10px; margin-top: 0;">⚠️</h1>
+      <h3 style="color: var(--accent-break); margin-bottom: 15px;">Multiple Tabs Detected</h3>
+      <div style="margin-bottom: 25px; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+        Work Hour Tracker is currently active in another tab. Running multiple instances simultaneously can cause data
+        corruption and double-counting.
+      </div>
+      <button class="btn-break" style="width: 100%; padding: 14px;" onclick="forceTakeover()">
+        Take Over Here
+      </button>
+    </div>
+  </div>
+
+  <!-- Native App Toast Notification Overlay -->
+  <div id="app-toast"
+    style="position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--modal-bg); border: 1px solid var(--border-main); color: var(--text-main); padding: 10px 24px; border-radius: 100px; font-weight: 600; font-size: 0.85rem; transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 4000; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); backdrop-filter: var(--panel-blur); -webkit-backdrop-filter: var(--panel-blur);">
+    Message
+  </div>
+
+  <!-- Confirmation dialog for destructive actions -->
+  <div id="confirm-modal" class="modal-overlay" style="z-index: 3500;">
+    <div class="modal-container">
+      <h3 id="confirm-title"
+        style="color: var(--accent-warning); margin-top: 0; margin-bottom: 15px; font-size: 1.1rem;">
+        Confirm Action</h3>
+      <div id="confirm-desc"
+        style="margin-bottom: 25px; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+        Are you sure?</div>
+      <div style="display: flex; gap: 10px">
+        <button class="btn-secondary"
+          style="flex: 1; padding: 12px; background: transparent; border: 1px solid var(--border-light); color: var(--text-main); border-radius: 12px; cursor: pointer; font-weight: 600;"
+          onclick="closeConfirmModal()">Cancel</button>
+        <button id="confirm-action-btn" class="btn-log"
+          style="flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer;">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log Edit Form Popup -->
+  <div id="edit-modal" class="modal-overlay" style="z-index: 3500;">
+    <div class="modal-container" style="max-width: 350px;">
+      <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.1rem; color: var(--text-main);">Edit Shift</h3>
+
+      <div style="text-align: left;">
+        <label
+          style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">
+          Date (MM/DD/YY)
+        </label>
+        <input type="text" id="edit-date"
+          style="width: 100%; margin-bottom: 15px; box-sizing: border-box; background: var(--panel-bg); border: 1px solid var(--border-main); color: var(--text-main); padding: 10px; border-radius: 8px; font-family: inherit; font-size: 0.85rem; outline: none;">
+
+        <label
+          style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">
+          Work Time (HH:MM:SS)
+        </label>
+        <input type="text" id="edit-work"
+          style="width: 100%; margin-bottom: 15px; box-sizing: border-box; background: var(--panel-bg); border: 1px solid var(--border-main); color: var(--text-main); padding: 10px; border-radius: 8px; font-family: inherit; font-size: 0.85rem; outline: none;">
+
+        <label
+          style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">
+          Break Time (HH:MM:SS)
+        </label>
+        <input type="text" id="edit-break"
+          style="width: 100%; margin-bottom: 15px; box-sizing: border-box; background: var(--panel-bg); border: 1px solid var(--border-main); color: var(--text-main); padding: 10px; border-radius: 8px; font-family: inherit; font-size: 0.85rem; outline: none;">
+
+        <label
+          style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">
+          Notes (Optional)
+        </label>
+        <textarea id="edit-notes"
+          style="width: 100%; margin-bottom: 25px; box-sizing: border-box; resize: vertical; min-height: 60px; background: var(--panel-bg); border: 1px solid var(--border-main); color: var(--text-main); padding: 10px; border-radius: 8px; font-family: inherit; font-size: 0.85rem; outline: none;"></textarea>
+      </div>
+
+      <div style="display: flex; gap: 10px">
+        <button class="btn-secondary"
+          style="flex: 1; padding: 12px; background: transparent; border: 1px solid var(--border-light); color: var(--text-main); border-radius: 12px; cursor: pointer; font-weight: 600;"
+          onclick="closeEditModal()">Cancel</button>
+        <button class="btn-log"
+          style="flex: 1; padding: 12px; background: rgba(96, 165, 250, 0.1); color: var(--accent-blue); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; font-weight: 600; cursor: pointer;"
+          onclick="saveEditModal()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manual Entry Form Popup Overlay -->
+  <div id="manual-modal" class="modal-overlay" style="z-index: 3500;">
+    <div class="modal-container" style="max-width: 350px;">
+      <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.1rem; color: var(--text-main);">Add Manual Shift</h3>
+      <div style="text-align: left;">
+        <label
+          style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">
+          Date (MM/DD/YY)
+        </label>
+        <input type="text" id="manual-date" placeholder="05/16/26"
+          style="width: 100%; margin-bottom: 15px; box-sizing: border-box; background: var(--panel-bg); border: 1px solid var(--border-main); color: var(--text-main); padding: 10px; border-radius: 8px; font-family: inherit; font-size: 0.85rem; outline: none;">
+
+        <div style="display: flex; gap: 15px;">
+          <div style="flex: 1;">
+            <label
+              style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">
+              Work (HH:MM:SS)
+            </label>
+            <input type="text" id="manual-work" placeholder="08:00:00"
+              style="width: 100%; margin-bottom: 15px; box-sizing: border-box; background: var(--panel-bg); border: 1px solid var(--border-main); color: var(--text-main); padding: 10px; border-radius: 8px; font-family: inherit; font-size: 0.85rem; outline: none;">
+          </div>
+          <div style="flex: 1;">
+            <label
+              style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">
+              Break (HH:MM:SS)
+            </label>
+            <input type="text" id="manual-break" value="00:00:00"
+              style="width: 100%; margin-bottom: 15px; box-sizing: border-box; background: var(--panel-bg); border: 1px solid var(--border-main); color: var(--text-main); padding: 10px; border-radius: 8px; font-family: inherit; font-size: 0.85rem; outline: none;">
+          </div>
+        </div>
+
+        <label
+          style="display: block; font-size: 0.75rem; color: var(--accent-blue); margin-bottom: 6px; font-weight: 700;">
+          Daily Goal for this shift
+        </label>
+        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
+          <input type="number" id="manual-goal-h" min="0" max="23"
+            style="width: 60px; background: var(--panel-bg); border: 1px solid var(--border-main); color: var(--text-main); padding: 8px; border-radius: 8px; text-align: center;">
+          <span style="font-size: 0.8rem; color: var(--text-muted);">h</span>
+          <input type="number" id="manual-goal-m" min="0" max="59"
+            style="width: 60px; background: var(--panel-bg); border: 1px solid var(--border-main); color: var(--text-main); padding: 8px; border-radius: 8px; text-align: center;">
+          <span style="font-size: 0.8rem; color: var(--text-muted);">m</span>
+        </div>
+
+        <label
+          style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">
+          Notes (Optional)
+        </label>
+        <textarea id="manual-notes"
+          style="width: 100%; margin-bottom: 25px; box-sizing: border-box; resize: vertical; min-height: 60px; background: var(--panel-bg); border: 1px solid var(--border-main); color: var(--text-main); padding: 10px; border-radius: 8px; font-family: inherit; font-size: 0.85rem; outline: none;"></textarea>
+      </div>
+      <div style="display: flex; gap: 10px">
+        <button class="btn-secondary"
+          style="flex: 1; padding: 12px; background: transparent; border: 1px solid var(--border-light); color: var(--text-main); border-radius: 12px; cursor: pointer; font-weight: 600;"
+          onclick="closeManualModal()">Cancel</button>
+        <button class="btn-log"
+          style="flex: 1; padding: 12px; background: rgba(74, 222, 128, 0.1); color: var(--accent-work); border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 12px; font-weight: 600; cursor: pointer;"
+          onclick="saveManualModal()">Add Log</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Note details display popup -->
+  <div id="note-modal" class="modal-overlay">
+    <div class="modal-container">
+      <h3 style="color: var(--accent-blue); margin-bottom: 10px">Shift Note</h3>
+      <div id="note-modal-text" style="
+            background: var(--element-bg);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            border: 1px solid var(--border-main);
+            max-height: 250px;
+            overflow-y: auto;
+            word-wrap: break-word;
+          "></div>
+      <button class="btn-log" style="
+            width: 100%;
+            padding: 12px;
+            background: var(--btn-log-bg);
+            color: var(--btn-log-text);
+            border: 1px solid var(--btn-log-border);
+            border-radius: 12px;
+            font-weight: 600;
+          " onclick="closeNoteModal()">
+        Close
+      </button>
+    </div>
+  </div>
+
+  <!-- Daily Goal Reached celebratory modal -->
+  <div id="goal-modal" class="modal-overlay">
+    <div class="modal-container" style="text-align: center; border: 2px solid var(--accent-work);">
+      <h1 style="font-size: 3rem; margin-bottom: 10px;">🎉</h1>
+      <h3 style="color: var(--accent-work); margin-bottom: 15px;">Daily Goal Reached!</h3>
+      <div style="margin-bottom: 25px; font-size: 0.9rem; color: var(--text-muted);">
+        You've hit your daily production target.
+      </div>
+      <button class="btn-work" style="width: 100%;"
+        onclick="document.getElementById('goal-modal').style.display='none'">
+        Got it!
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MAIN APPLICATION DASHBOARD GRID
+       ========================================================================= -->
+  <div class="console-panel" id="main-dashboard">
+
+    <!-- LEFT COMPONENT: Timers, Goals, & Controls -->
+    <div class="main-ui">
+      <!-- Header Status Bar -->
+      <div class="status-bar">
+        <div class="status-badge status-time">
+          <select id="primary-tz" class="tz-select">
+            <option value="America/Los_Angeles">PST</option>
+            <option value="America/Denver">MST</option>
+            <option value="America/Chicago">CST</option>
+            <option value="America/New_York">EST</option>
+          </select>
+          <span id="primary-clock">00:00 AM</span>
+          <span style="color: var(--border-light); font-size: 1.1rem; margin: 0 8px">|</span>
+          BST: <span id="bst-clock">00:00 PM</span>
+          <div id="last-seen" style="
+                margin-left: 10px;
+                font-size: 0.65rem;
+                color: var(--text-muted);
+                width: 65px;
+                flex-shrink: 0;
+                text-align: center;
+                white-space: nowrap;
+                font-variant-numeric: tabular-nums;
+              ">
+            Active
+          </div>
+        </div>
+        <div style="display: flex; gap: 15px; align-items: stretch">
+          <div class="status-badge goal-inputs">
+            <span class="label">Goal:</span>
+            <input type="number" id="goal-hours" min="0" value="8" /><span class="unit">h</span>
+            <input type="number" id="goal-mins" min="0" max="59" value="0" /><span class="unit">m</span>
+          </div>
+          <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">
+            <span id="theme-toggle-icon" style="display: flex; align-items: center"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Counters Visualization Section -->
+      <div class="timers-wrapper">
+        <div class="label-xs">Production Time</div>
+        <div id="work-timer" class="timer-val">00:00:00</div>
+
+        <!-- Linear Progress Rail -->
+        <div class="progress-rail">
+          <div id="progress-fill"></div>
+        </div>
+        <div style="
+              display: flex;
+              justify-content: space-between;
+              font-size: 0.75rem;
+              color: var(--text-muted);
+              margin-top: -10px;
+              margin-bottom: 20px;
+            ">
+          <span id="progress-text" style="font-family: 'JetBrains Mono', monospace;">0.0% (Remaining: 08:00:00)</span>
+          <span id="eta-text" style="font-family: 'JetBrains Mono', monospace;">Est. EOD: --:-- BST</span>
+        </div>
+
+        <div class="label-xs">Break Time</div>
+        <div id="break-timer" class="timer-val">00:00:00</div>
+      </div>
+
+      <!-- Dynamic Active Session Controllers -->
+      <div class="actions">
+        <button id="start-btn" class="btn-work">Start Work</button>
+        <button id="pause-btn" class="btn-break">Take Break</button>
+        <button id="submit-btn" class="btn-log" onclick="openSubmitModal()">Submit EOD</button>
+      </div>
+    </div>
+
+    <!-- RIGHT COMPONENT: Tabbed History logs and Analytical Insights -->
+    <div class="sidebar">
+      <!-- Navigation tabs switcher -->
+      <div class="tab-nav">
+        <button class="tab-btn active" data-target="logbook" onclick="switchTab('logbook')">
+          Logbook
+        </button>
+        <button class="tab-btn" data-target="insights" onclick="switchTab('insights')">
+          Insights
+        </button>
+      </div>
+
+      <!-- Tab Content Area: Historical Shift Logbook -->
+      <div id="tab-logbook" class="tab-content" style="display: block">
+        <div class="logbook-controls-header">
+          <!-- Nested inline layout container -->
+          <div style="display: flex; gap: 0px; align-items: center; margin-left: -8px;">
+            <!-- Toggle Filters Drawer Button -->
+            <button class="header-icon-btn" id="filter-toggle-btn" onclick="toggleFilters()" title="Advanced Filters"
+              style="gap: 6px; font-family: inherit; font-size: 0.8rem; font-weight: 600; padding: 6px 10px; border-radius: 8px;">
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="18" height="18">
+                <line x1="4" y1="21" x2="4" y2="14"></line>
+                <line x1="4" y1="10" x2="4" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12" y2="3"></line>
+                <line x1="20" y1="21" x2="20" y2="16"></line>
+                <line x1="20" y1="12" x2="20" y2="3"></line>
+                <line x1="1" y1="14" x2="7" y2="14"></line>
+                <line x1="9" y1="8" x2="15" y2="8"></line>
+                <line x1="17" y1="16" x2="23" y2="16"></line>
+              </svg>
+              Filters
+            </button>
+
+            <!-- Manual Log Addition Button -->
+            <button class="header-icon-btn" onclick="openManualModal()" title="Add Manual Entry"
+              style="gap: 6px; font-family: inherit; font-size: 0.8rem; font-weight: 600; padding: 6px 10px; border-radius: 8px;">
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="18" height="18">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Add Log
+            </button>
+          </div>
+
+          <!-- Total Active Log Item Indicator Counter -->
+          <span id="log-count-display" style="
+                font-size: 0.75rem;
+                color: var(--text-muted);
+                font-weight: 600;
+                font-variant-numeric: tabular-nums;
+              "></span>
+        </div>
+
+        <!-- Filter Drawer Container -->
+        <div id="advanced-filters" class="advanced-filters">
+          <div class="filter-row">
+            <select id="filter-time" class="filter-select" style="flex: 1">
+              <option value="ALL">All Time</option>
+              <option value="TODAY">Today</option>
+              <option value="WEEK">This Week</option>
+              <option value="MONTH">This Month</option>
+            </select>
+            <select id="filter-status" class="filter-select" style="flex: 1">
+              <option value="ALL">All Status</option>
+              <option value="OVER">Over Goal</option>
+              <option value="UNDER">Under Goal</option>
+            </select>
+          </div>
+          <div class="filter-row">
+            <div style="display: flex; align-items: center; gap: 6px; flex: 1;">
+              <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600;">From:</span>
+              <input type="date" id="filter-date-start" class="filter-input"
+                style="flex: 1; font-size: 0.7rem; padding: 4px;" />
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; flex: 1;">
+              <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600;">To:</span>
+              <input type="date" id="filter-date-end" class="filter-input"
+                style="flex: 1; font-size: 0.7rem; padding: 4px;" />
+            </div>
+          </div>
+          <div class="filter-row">
+            <select id="filter-hours-op" class="filter-select" style="flex: 1.5">
+              <option value="ALL">Hours worked...</option>
+              <option value="MORE">More than</option>
+              <option value="LESS">Less than</option>
+            </select>
+            <div style="display: flex; align-items: center; gap: 6px; flex: 1;">
+              <input type="number" id="filter-hours-val" class="filter-input" placeholder="0" min="0"
+                style="width: 100%; font-size: 0.75rem; padding: 4px;" disabled />
+              <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600;">hrs</span>
+            </div>
+          </div>
+          <div class="filter-row" style="justify-content: space-between; margin-top: 4px">
+            <label class="filter-checkbox-label">
+              <input type="checkbox" id="filter-notes" /> Has Notes
+            </label>
+            <button class="clear-filter-btn" onclick="clearFilters()">Clear Filters</button>
+          </div>
+        </div>
+
+        <!-- Virtual list target container -->
+        <div id="log-container"></div>
+      </div>
+
+      <!-- Tab Content Area: Analytical Insights & Metrics -->
+      <div id="tab-insights" class="tab-content" style="display: none; flex-direction: column; overflow: hidden;">
+        <!-- Weekly Segmented Progress Visualizations -->
+        <div class="stat-card" id="weekly-progress-card"
+          style="margin-bottom: 12px; flex-shrink: 0; padding: 10px 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+            <div style="font-family: 'JetBrains Mono', monospace; display: flex; align-items: baseline;">
+              <span style="
+                    font-size: 0.75rem;
+                    color: var(--text-muted);
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    margin-right: 6px;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                  ">
+                Work:
+              </span>
+              <span id="weekly-summary-text" class="stat-val" style="font-size: 1.05rem; color: var(--text-main);">
+                00:00:00 / 40h
+              </span>
+              <span id="weekly-progress-percent" style="
+                    font-size: 0.7rem;
+                    font-weight: 600;
+                    color: var(--text-muted);
+                    margin-left: 4px;
+                  ">
+                (0%)
+              </span>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">
+              Total Break:
+              <span id="total-weekly-break"
+                style="color: var(--accent-break); font-family: 'JetBrains Mono', monospace;">
+                00:00:00
+              </span>
+            </div>
+          </div>
+          <div id="weekly-status-msg"
+            style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 8px; text-align: left;">
+            Calculating...
+          </div>
+
+          <!-- Segmented Days Bar (Monday-Friday) -->
+          <div class="segmented-progress-bar">
+            <div class="progress-segment" data-day="1">
+              <div class="progress-segment-fill"></div>
+              <div style="
+                    position: absolute;
+                    inset: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.6rem;
+                    font-weight: 800;
+                    color: var(--text-main);
+                    opacity: 0.7;
+                    z-index: 1;
+                    pointer-events: none;
+                  ">
+                M
+              </div>
+            </div>
+            <div class="progress-segment" data-day="2">
+              <div class="progress-segment-fill"></div>
+              <div style="
+                    position: absolute;
+                    inset: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.6rem;
+                    font-weight: 800;
+                    color: var(--text-main);
+                    opacity: 0.7;
+                    z-index: 1;
+                    pointer-events: none;
+                  ">
+                T
+              </div>
+            </div>
+            <div class="progress-segment" data-day="3">
+              <div class="progress-segment-fill"></div>
+              <div style="
+                    position: absolute;
+                    inset: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.6rem;
+                    font-weight: 800;
+                    color: var(--text-main);
+                    opacity: 0.7;
+                    z-index: 1;
+                    pointer-events: none;
+                  ">
+                W
+              </div>
+            </div>
+            <div class="progress-segment" data-day="4">
+              <div class="progress-segment-fill"></div>
+              <div style="
+                    position: absolute;
+                    inset: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.6rem;
+                    font-weight: 800;
+                    color: var(--text-main);
+                    opacity: 0.7;
+                    z-index: 1;
+                    pointer-events: none;
+                  ">
+                T
+              </div>
+            </div>
+            <div class="progress-segment" data-day="5">
+              <div class="progress-segment-fill"></div>
+              <div style="
+                    position: absolute;
+                    inset: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.6rem;
+                    font-weight: 800;
+                    color: var(--text-main);
+                    opacity: 0.7;
+                    z-index: 1;
+                    pointer-events: none;
+                  ">
+                F
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weekly navigation selector header -->
+        <div class="label-xs"
+          style="display: flex; justify-content: center; align-items: center; margin-top: 5px; margin-bottom: 10px;">
+          <div style="display: flex; align-items: center; gap: 12px">
+            <span class="nav-arrow" onclick="changeWeekOffset(-1)" title="Previous Week">&lt;</span>
+            <span id="week-month-label"></span>
+            <span class="nav-arrow" onclick="changeWeekOffset(1)" title="Next Week">&gt;</span>
+          </div>
+        </div>
+
+        <!-- Scrollable weekly analysis stats -->
+        <div id="weekly-breakdown" style="flex: 1; overflow-y: auto; min-height: 0; padding-right: 4px;"></div>
+      </div>
+
+      <!-- Data Export / Restore / Wipe Panel -->
+      <div class="sidebar-footer">
+        <div class="footer-text">
+          <strong>Data Management -&gt;</strong><br />
+          Changes are auto-saved in browser<br />
+          All logs are in PST time
+        </div>
+        <div class="footer-icons">
+          <button title="Export CSV" class="icon-btn sq-btn" onclick="exportCSV()">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </button>
+          <button title="Copy All Logs" class="icon-btn sq-btn" onclick="copyLog()">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+            </svg>
+          </button>
+          <button title="Backup Data (JSON)" class="icon-btn sq-btn" onclick="exportJSON()">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </button>
+          <button title="Restore Data (JSON)" class="icon-btn sq-btn"
+            onclick="document.getElementById('import-file').click()">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </button>
+          <button title="Reset Entire Tracker" class="icon-btn sq-btn danger-icon" onclick="clearAllData()">
+            <svg viewBox="0 0 24 24" stroke="#f87171" fill="none" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+          <input type="file" id="import-file" accept=".json" style="display: none" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /*==========================================================================
+     * 1. STATE & CONSTANTS CONFIGURATION
+     * =========================================================================*/
+
+    // Storage Keys
+    const STATE_KEY = "production_tracker_state_v2";
+    const LOG_KEY = "production_tracker_logs_v2";
+    const GOAL_H_KEY = "production_goal_h_v2";
+    const GOAL_M_KEY = "production_goal_m_v2";
+    const TZ_KEY = "production_tz_pref";
+    const THEME_KEY = "production_theme_pref";
+
+    // Inactivity / Idle limits (30 Minutes threshold)
+    const IDLE_THRESHOLD = 30 * 60 * 1000;
+
+    // Vector Icon Resources (SVG mappings)
+    const SVGs = {
+      copy: `<svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>`,
+      edit: `<svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>`,
+      plus: `<svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="18" height="18"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+      note: `<svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
+      trash: `<svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`,
+      themeSun: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>`,
+      themeMoon: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>`,
+      themeMidnight: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" fill-opacity="0.3" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path><path d="M19 3v4M17 5h4" stroke-width="1.5"></path></svg>`,
+    };
+
+    // Live session core tracking state structure
+    let state = {
+      workAccumulated: 0,
+      breakAccumulated: 0,
+      currentMode: null,
+      workStartTime: null,
+      breakStartTime: null,
+      loginTimestamp: null,
+      activeDate: null,
+      idleLock: false,
+      idleStart: null,
+      preIdleMode: null,
+      lastActivity: null,
+      goalNotified: false,
+    };
+
+    // Shared State Backups and Transaction Variables
+    let appToastTimeout;
+    let confirmCallback = null;
+    let timeOffsetMs = 0;
+    let undoTimeout;
+    let lastStateBackup = null;
+    let displayBaseDate = null;
+    let pendingSubmitData = null;
+    let lastActivity = Date.now();
+    let activityThrottle = false;
+    let editingLogIndex = -1;
+    let cachedBaseFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+
+    // Memory Caches
+    let cachedLogs = [];
+    let virtualScrollLogs = [];
+    let weeklyCache = new Map(); // Key: UTC Monday Epoch Milliseconds
+
+    /*==========================================================================
+     * 2. DOM ELEMENT BINDINGS
+     * =========================================================================*/
+    const DOM = {
+      workTimer: document.getElementById("work-timer"),
+      breakTimer: document.getElementById("break-timer"),
+      primaryClock: document.getElementById("primary-clock"),
+      bstClock: document.getElementById("bst-clock"),
+      startBtn: document.getElementById("start-btn"),
+      pauseBtn: document.getElementById("pause-btn"),
+      progressFill: document.getElementById("progress-fill"),
+      progressText: document.getElementById("progress-text"),
+      logContainer: document.getElementById("log-container"),
+      filterTime: document.getElementById("filter-time"),
+      filterStatus: document.getElementById("filter-status"),
+      filterNotes: document.getElementById("filter-notes"),
+      filterDate: document.getElementById("filter-date"),
+      filterHoursOp: document.getElementById("filter-hours-op"),
+      filterHoursVal: document.getElementById("filter-hours-val"),
+      weekMonthLabel: document.getElementById("week-month-label"),
+      weeklyBreakdown: document.getElementById("weekly-breakdown"),
+      weeklyBreak: document.getElementById("total-weekly-break"),
+      goalHours: document.getElementById("goal-hours"),
+      goalMins: document.getElementById("goal-mins"),
+      primaryTz: document.getElementById("primary-tz"),
+      submitModal: document.getElementById("submit-modal"),
+      modalShiftNotes: document.getElementById("modal-shift-notes"),
+      noteModal: document.getElementById("note-modal"),
+      noteModalText: document.getElementById("note-modal-text"),
+      ghostModal: document.getElementById("ghost-modal"),
+      noteSuggestions: document.getElementById("note-suggestions"),
+    };
+
+    /*==========================================================================
+     * 3. DATE-TIME FORMATTING CONFIGURATORS
+     * =========================================================================*/
+    const pstFormatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Los_Angeles",
+      hour12: true,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+
+    const pstDateFormatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Los_Angeles",
+      year: "2-digit",
+      month: "2-digit",
+      day: "2-digit",
+    });
+
+    const bstFormatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Dhaka",
+      hour12: true,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+
+    const loginFormatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Los_Angeles",
+      hour12: true,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+
+    const bstEtaFormatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Dhaka",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    let primaryFormatter;
+
+    /**
+     * Updates the clock formatter for the user's primary selected timezone.
+     */
+    function updatePrimaryFormatter() {
+      const tz = DOM.primaryTz.value || "America/Los_Angeles";
+      primaryFormatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: tz,
+        hour12: true,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+    }
+
+    /*==========================================================================
+     * 4. ATOMIC TIME SYNCHRONIZATION ENGINE
+     * =========================================================================*/
+
+    /**
+     * Syncs browser clock drift offset against atomic clock time servers in the background.
+     * Prevents client timezone manipulation or machine delay inconsistencies.
+     */
+    async function fetchTrueTime() {
+      try {
+        const start = performance.now();
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+        const res = await fetch("https://timeapi.io/api/Time/current/zone?timeZone=UTC", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) throw new Error("API not ok");
+        const data = await res.json();
+        const latency = (performance.now() - start) / 2;
+
+        // TimeAPI returns ISO structure without 'Z' trailing notation
+        const serverTime = new Date(data.dateTime + "Z").getTime() + latency;
+        timeOffsetMs = serverTime - Date.now();
+        console.log("Atomic time synced. Offset:", timeOffsetMs, "ms");
+      } catch (err) {
+        console.warn("Atomic time sync failed. Using local clock fallback.");
+      }
+    }
+
+    /**
+     * Returns the adjusted server/atomic epoch timestamp in milliseconds.
+     * @returns {number} The true epoch timestamp.
+     */
+    function getTrueTime() {
+      return Date.now() + timeOffsetMs;
+    }
+
+    /*==========================================================================
+     * 5. LOCAL DATABASE ENGINE (INDEXEDDB CHUNKING)
+     * =========================================================================*/
+
+    /**
+     * Database connection promise. Orchestrates stores setup.
+     * logs_chunked is partitioned by YYYY-MM keys to load/save massive logs incrementally without memory limits.
+     */
+    const dbPromise = new Promise((resolve, reject) => {
+      const request = indexedDB.open("WorkTrackerDB", 2);
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains("logs")) {
+          db.createObjectStore("logs", { keyPath: "id" });
+        }
+        if (!db.objectStoreNames.contains("logs_chunked")) {
+          db.createObjectStore("logs_chunked", { keyPath: "chunkId" });
+        }
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+
+    /**
+     * Persists historical logs grouped into chronological chunk blocks.
+     * @param {Array} logsData - Full array of log entries to divide and save.
+     */
+    async function saveLogsToDB(logsData) {
+      const db = await dbPromise;
+      return new Promise((resolve) => {
+        const tx = db.transaction("logs_chunked", "readwrite");
+        const store = tx.objectStore("logs_chunked");
+
+        // Regroup logs chronologically into month-level buckets (e.g. "2026-05")
+        const chunks = {};
+        logsData.forEach((log) => {
+          const dObj = new Date(log.epochMs);
+          const chunkId = `${dObj.getUTCFullYear()}-${String(dObj.getUTCMonth() + 1).padStart(2, "0")}`;
+          if (!chunks[chunkId]) chunks[chunkId] = [];
+          chunks[chunkId].push(log);
+        });
+
+        // Wipe obsolete records and overwrite fresh chunks atomically
+        const reqClear = store.clear();
+        reqClear.onsuccess = () => {
+          Object.keys(chunks).forEach((chunkId) => {
+            store.put({ chunkId, data: chunks[chunkId] });
+          });
+          resolve();
+        };
+      });
+    }
+
+    /**
+     * Loads, stitches, and converts all legacy database formats to current chunk models.
+     * @returns {Promise<Array>} Decoded array of sorted shift entries.
+     */
+    async function loadLogsFromDB() {
+      const db = await dbPromise;
+      return new Promise((resolve) => {
+        const txCheck = db.transaction(["logs", "logs_chunked"], "readonly");
+        const reqCheck = txCheck.objectStore("logs").get("all_logs");
+
+        reqCheck.onsuccess = () => {
+          if (reqCheck.result && reqCheck.result.data) {
+            // Migrate old singular large array blocks to structural chunks
+            const oldLogs = reqCheck.result.data;
+            saveLogsToDB(oldLogs).then(() => {
+              const txDel = db.transaction("logs", "readwrite");
+              txDel.objectStore("logs").delete("all_logs");
+            });
+            resolve(oldLogs);
+          } else {
+            // Fetch chunk records and stitch them together sequentially
+            const txChunk = db.transaction("logs_chunked", "readonly");
+            const reqChunk = txChunk.objectStore("logs_chunked").getAll();
+            reqChunk.onsuccess = () => {
+              if (reqChunk.result) {
+                reqChunk.result.sort((a, b) => b.chunkId.localeCompare(a.chunkId));
+                let allLogs = [];
+                reqChunk.result.forEach((chunk) => {
+                  allLogs = allLogs.concat(chunk.data);
+                });
+                // Seed lookup index shortcuts on runtime load for O(1) performance virtual list mapping
+                for (let i = 0; i < allLogs.length; i++) {
+                  allLogs[i]._idx = i;
+                }
+                resolve(allLogs);
+              } else {
+                resolve([]);
+              }
+            };
+          }
+        };
+        reqCheck.onerror = () => resolve([]);
+      });
+    }
+
+    /*==========================================================================
+     * 6. BROADCAST CHANNEL (INSTANCE MULTI-TAB LOCK)
+     * =========================================================================*/
+    const tabSyncChannel = new BroadcastChannel("work_tracker_sync");
+
+    // Ping existing instances to verify tab status
+    tabSyncChannel.postMessage({ type: "ping" });
+
+    tabSyncChannel.onmessage = (e) => {
+      const conflictModal = document.getElementById("tab-conflict-modal");
+      if (e.data.type === "ping") {
+        // If this active instance is healthy (not currently locked out), claim ownership
+        if (conflictModal.style.display !== "flex") {
+          tabSyncChannel.postMessage({ type: "pong" });
+        }
+      } else if (e.data.type === "pong" || e.data.type === "takeover") {
+        // Halt and lock down this tab if another instance exists or is forcing ownership
+        conflictModal.style.display = "flex";
+      }
+    };
+
+    /**
+     * Reclaims master tracking ownership on the local tab and forces other instances to step down.
+     */
+    function forceTakeover() {
+      document.getElementById("tab-conflict-modal").style.display = "none";
+      tabSyncChannel.postMessage({ type: "takeover" });
+
+      // Pull latest database and localStorage states to synchronize this session instantly
+      loadState();
+      loadLogsFromDB().then((logs) => {
+        cachedLogs = logs;
+        rebuildWeeklyCache();
+        renderStaticUI();
+        renderTimersOnly();
+        renderLogbook();
+        renderInsights();
+      });
+    }
+
+    /*==========================================================================
+     * 7. CUSTOM GLASS & NOIR SYSTEM UTILITY CONTROLLERS
+     * =========================================================================*/
+    let currentTheme = localStorage.getItem(THEME_KEY) || "midnight";
+    if (currentTheme === "linear") currentTheme = "midnight";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+
+    // DOM Manipulation Fast Helpers
+    function setText(el, text) {
+      if (el && el.textContent !== text) el.textContent = text;
+    }
+
+    function setStyle(el, prop, val) {
+      if (el && el.style[prop] !== val) el.style[prop] = val;
+    }
+
+    /**
+     * Renders matching toggles for current active design systems
+     */
+    function renderThemeToggle() {
+      const iconSpan = document.getElementById("theme-toggle-icon");
+      if (!iconSpan) return;
+      if (currentTheme === "midnight") {
+        iconSpan.innerHTML = SVGs.themeSun;
+      } else {
+        iconSpan.innerHTML = SVGs.themeMidnight;
+      }
+    }
+
+    /**
+     * Triggers theme updates with subtle rotation micro-animations
+     */
+    function toggleTheme() {
+      const icon = document.getElementById("theme-toggle-icon");
+      if (icon) icon.classList.add("theme-switching");
+
+      setTimeout(() => {
+        currentTheme = currentTheme === "midnight" ? "glass" : "midnight";
+        document.documentElement.setAttribute("data-theme", currentTheme);
+        localStorage.setItem(THEME_KEY, currentTheme);
+        renderStaticUI();
+        renderThemeToggle();
+        if (icon) icon.classList.remove("theme-switching");
+      }, 250);
+    }
+
+    /*==========================================================================
+     * 8. MEMORY CACHE UTILITIES
+     * =========================================================================*/
+
+    /**
+     * Returns logs array reference.
+     */
+    function getLogs() {
+      return cachedLogs;
+    }
+
+    /**
+     * Saves runtime logs array both in-memory and database stores, injecting fast O(1) indices.
+     * @param {Array} logs - Updated shift list array.
+     */
+    function saveLogs(logs) {
+      for (let i = 0; i < logs.length; i++) {
+        logs[i]._idx = i;
+      }
+      cachedLogs = logs;
+      rebuildWeeklyCache();
+      saveLogsToDB(logs);
+    }
+
+    /**
+     * Groups shifts by ISO UTC Monday start bounds. Avoids expensive date re-evaluation
+     * using basic math equations to map indexes in O(1).
+     */
+    function rebuildWeeklyCache() {
+      const logs = getLogs();
+      weeklyCache.clear();
+      for (let i = 0; i < logs.length; i++) {
+        const log = logs[i];
+        const daysSinceEpoch = Math.floor(log.epochMs / 86400000);
+        const dayOfWeek = (daysSinceEpoch + 4) % 7; // 0=Sunday, 1=Monday...
+        const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        const key = log.epochMs + diffToMonday * 86400000;
+
+        if (!weeklyCache.has(key)) {
+          weeklyCache.set(key, []);
+        }
+        weeklyCache.get(key).push(log);
+      }
+    }
+
+    // Timezone Conversions and Getters
+    function getPSTClock() {
+      return pstFormatter.format(new Date(getTrueTime()));
+    }
+
+    function getPSTDate() {
+      return pstDateFormatter.format(new Date(getTrueTime()));
+    }
+
+    function getPSTDateObj() {
+      return new Date(new Date(getTrueTime()).toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
+    }
+
+    // Inactivity tracker helper
+    function updateActivity() {
+      if (!state.idleLock && !activityThrottle) {
+        lastActivity = getTrueTime();
+        activityThrottle = true;
+        setTimeout(() => {
+          activityThrottle = false;
+        }, 1000);
+      }
+    }
+
+    window.addEventListener("mousemove", updateActivity, { passive: true });
+    window.addEventListener("keydown", updateActivity, { passive: true });
+    window.addEventListener("click", updateActivity, { passive: true });
+    window.addEventListener("scroll", updateActivity, { passive: true });
+
+    /*==========================================================================
+     * 9. TIMERS ACCUMULATION & RUNTIME TRACKING
+     * =========================================================================*/
+
+    /**
+     * Calculates the cumulative work duration in seconds.
+     * @param {number} nowMs - Current true epoch time.
+     * @returns {number} Accumulated active work time.
+     */
+    function getCurrentWorkSeconds(nowMs = getTrueTime()) {
+      let total = state.workAccumulated;
+      if (state.currentMode === "work" && state.workStartTime) {
+        total += Math.max(0, (nowMs - state.workStartTime) / 1000);
+      }
+      return total;
+    }
+
+    /**
+     * Calculates the cumulative break duration in seconds.
+     * @param {number} nowMs - Current true epoch time.
+     * @returns {number} Accumulated break time.
+     */
+    function getCurrentBreakSeconds(nowMs = getTrueTime()) {
+      let total = state.breakAccumulated;
+      if (state.currentMode === "break" && state.breakStartTime) {
+        total += Math.max(0, (nowMs - state.breakStartTime) / 1000);
+      }
+      return total;
+    }
+
+    /**
+     * Backup mechanism to save work state continuously. Rescues unsaved progress on reload/crashes.
+     * @param {number} overrideNow - Optional timestamp adjustment context.
+     */
+    function commitCrashRecoveryTime(overrideNow) {
+      if (document.getElementById("tab-conflict-modal").style.display === "flex") return;
+
+      const now = overrideNow || getTrueTime();
+      let changed = false;
+
+      if (state.lastActivity !== lastActivity) {
+        state.lastActivity = lastActivity;
+        changed = true;
+      }
+
+      if (state.currentMode === "work" && state.workStartTime) {
+        state.workAccumulated += Math.max(0, now - state.workStartTime) / 1000;
+        state.workStartTime = now;
+        changed = true;
+      } else if (state.currentMode === "break" && state.breakStartTime) {
+        state.breakAccumulated += Math.max(0, now - state.breakStartTime) / 1000;
+        state.breakStartTime = now;
+        changed = true;
+      }
+      if (changed) saveState();
+    }
+
+    /**
+     * Rotates tracking cycles Work <=> Break modes safely.
+     * @param {string} mode - 'work', 'break', or null.
+     */
+    function switchMode(mode) {
+      if (state.currentMode === mode) return;
+      commitCrashRecoveryTime();
+      state.currentMode = mode;
+      const now = getTrueTime();
+      if (mode === "work") {
+        state.workStartTime = now;
+        state.breakStartTime = null;
+        if (!state.loginTimestamp) state.loginTimestamp = now;
+      }
+      if (mode === "break") {
+        state.breakStartTime = now;
+        state.workStartTime = null;
+      }
+      saveState();
+      renderStaticUI();
+      renderTimersOnly();
+    }
+
+    /*==========================================================================
+     * 10. REALTIME RENDERING CONTROLLERS
+     * =========================================================================*/
+
+    /**
+     * Updates static button names, states, theme-specific styles, and glows.
+     */
+    function renderStaticUI() {
+      const isIdle = !!state.idleLock;
+      const hasStarted = !!state.loginTimestamp;
+      const mode = state.currentMode;
+
+      if (!hasStarted) {
+        DOM.startBtn.style.display = "flex";
+        DOM.pauseBtn.style.display = "none";
+        document.getElementById("submit-btn").style.display = "none";
+        DOM.startBtn.textContent = "Begin Work";
+        DOM.startBtn.disabled = isIdle;
+      } else {
+        DOM.startBtn.style.display = "none";
+        DOM.pauseBtn.style.display = "flex";
+        document.getElementById("submit-btn").style.display = "flex";
+
+        if (mode === "work") {
+          DOM.pauseBtn.textContent = "Take a Break";
+          DOM.pauseBtn.className = "btn-break";
+        } else {
+          DOM.pauseBtn.textContent = "Resume Work";
+          DOM.pauseBtn.className = "btn-work";
+        }
+
+        DOM.pauseBtn.disabled = isIdle;
+        document.getElementById("submit-btn").disabled = isIdle;
+      }
+
+      const workSec = getCurrentWorkSeconds();
+      const breakSec = getCurrentBreakSeconds();
+
+      setStyle(DOM.workTimer, "transition", "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)");
+      setStyle(DOM.breakTimer, "transition", "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)");
+
+      if (state.currentMode === "work") {
+        setStyle(DOM.workTimer, "color", "var(--accent-work)");
+        setStyle(DOM.workTimer, "opacity", "1");
+        setStyle(DOM.workTimer, "filter", "none");
+      } else {
+        if (workSec === 0) {
+          setStyle(DOM.workTimer, "color", "var(--text-muted)");
+          setStyle(DOM.workTimer, "opacity", "0.15");
+          setStyle(DOM.workTimer, "filter", "grayscale(100%)");
+        } else {
+          setStyle(DOM.workTimer, "color", "var(--text-main)");
+          setStyle(DOM.workTimer, "opacity", "0.7");
+          setStyle(DOM.workTimer, "filter", "none");
+        }
+      }
+
+      if (state.currentMode === "break") {
+        setStyle(DOM.breakTimer, "color", "var(--accent-break)");
+        setStyle(DOM.breakTimer, "opacity", "1");
+        setStyle(DOM.breakTimer, "filter", "none");
+      } else {
+        if (breakSec === 0) {
+          setStyle(DOM.breakTimer, "color", "var(--text-muted)");
+          setStyle(DOM.breakTimer, "opacity", "0.15");
+          setStyle(DOM.breakTimer, "filter", "grayscale(100%)");
+        } else {
+          setStyle(DOM.breakTimer, "color", "var(--text-main)");
+          setStyle(DOM.breakTimer, "opacity", "0.7");
+          setStyle(DOM.breakTimer, "filter", "none");
+        }
+      }
+
+      const isSpecial = currentTheme === "midnight";
+      const glowOpacity = "0.3";
+      const glowBlur = "25px";
+
+      setStyle(
+        DOM.workTimer,
+        "textShadow",
+        state.currentMode !== "work" || !isSpecial
+          ? "none"
+          : `0 0 ${glowBlur} color-mix(in srgb, var(--accent-work) ${parseFloat(glowOpacity) * 100}%, transparent)`
+      );
+      setStyle(
+        DOM.breakTimer,
+        "textShadow",
+        state.currentMode !== "break" || !isSpecial
+          ? "none"
+          : `0 0 ${glowBlur} color-mix(in srgb, var(--accent-break) ${parseFloat(glowOpacity) * 100}%, transparent)`
+      );
+    }
+
+    /**
+     * Repaints current live clock indicators, document title, and progress bars.
+     * Skips DOM modifications if window tab is backgrounded.
+     * 
+     * @param {Date} nowDate - True local date instance.
+     */
+    function renderTimersOnly(nowDate = new Date(getTrueTime())) {
+      const nowMs = nowDate.getTime();
+      const workSeconds = pendingSubmitData ? pendingSubmitData.workSec : getCurrentWorkSeconds(nowMs);
+      const breakSeconds = pendingSubmitData ? pendingSubmitData.breakSec : getCurrentBreakSeconds(nowMs);
+
+      // Browser active tab status title update
+      let icon = "⚪";
+      let status = "Paused";
+      let timeStr = formatDuration(workSeconds);
+
+      if (state.currentMode === "work") {
+        icon = "🟢";
+        status = "Work";
+        timeStr = formatDuration(workSeconds);
+      } else if (state.currentMode === "break") {
+        icon = "🔴";
+        status = "Break";
+        timeStr = formatDuration(breakSeconds);
+      }
+      document.title = `${icon} ${status} | ${timeStr}`;
+
+      // Refresh daily targets
+      updateProgress(workSeconds);
+
+      // Render visible controls
+      if (!document.hidden) {
+        setText(DOM.workTimer, formatDuration(workSeconds));
+        setText(DOM.breakTimer, formatDuration(breakSeconds));
+        setText(DOM.primaryClock, primaryFormatter.format(nowDate));
+        setText(DOM.bstClock, bstFormatter.format(nowDate));
+      }
+    }
+
+    /**
+     * Adjusts active progress bar scales, percentages, remaining times, and goal reachings.
+     * 
+     * @param {number} workSeconds - Live worked seconds for the active date.
+     */
+    function updateProgress(workSeconds) {
+      const goalSec = getGoalSeconds();
+      const diff = workSeconds - goalSec;
+      const percent = goalSec > 0 ? Math.min((workSeconds / goalSec) * 100, 100) : 100;
+      const scaleValue = percent / 100;
+
+      setStyle(DOM.progressFill, "transform", `scaleX(${scaleValue})`);
+      setStyle(DOM.progressFill, "background", percent >= 100 ? "var(--accent-work)" : "var(--accent-blue)");
+
+      const isSpecial = currentTheme === "midnight";
+      if (isSpecial) {
+        const shadowVal =
+          percent >= 100
+            ? "0 0 10px color-mix(in srgb, var(--accent-work) 40%, transparent)"
+            : "0 0 10px color-mix(in srgb, var(--accent-blue) 40%, transparent)";
+        setStyle(DOM.progressFill, "boxShadow", shadowVal);
+      } else {
+        setStyle(DOM.progressFill, "boxShadow", "none");
+      }
+
+      const progressStr =
+        diff >= 0
+          ? `${percent.toFixed(1)}% (Overtime: ${formatFriendlyDuration(diff, "0m")})`
+          : `${percent.toFixed(1)}% (Left: ${formatFriendlyDuration(Math.abs(diff), "0m")})`;
+      setText(DOM.progressText, progressStr);
+
+      // Force Estimated End of Day prediction to Asia/Dhaka time zone
+      const etaEl = document.getElementById("eta-text");
+      if (diff >= 0) {
+        setText(etaEl, "Goal Reached");
+        etaEl.style.color = "var(--accent-work)";
+      } else {
+        const remainingMs = Math.abs(diff) * 1000;
+        const finishTime = new Date(getTrueTime() + remainingMs);
+        const bstEtaStr = bstEtaFormatter.format(finishTime);
+        setText(etaEl, `Est. EOD: ${bstEtaStr} BST`);
+        etaEl.style.color = "var(--text-muted)";
+      }
+
+      // Celebratory alert when daily production hours hit target boundary
+      if (workSeconds >= goalSec && !state.goalNotified && state.currentMode === "work") {
+        document.getElementById("goal-modal").style.display = "flex";
+        playGoalSound();
+        state.goalNotified = true;
+        saveState();
+      }
+    }
+
+    /*==========================================================================
+     * 11. END OF DAY SUBMISSIONS AND UNDO ACTIONS
+     * =========================================================================*/
+
+    /**
+     * Gathers high-frequency suggestion phrases from historic notes to speed up entry inputs.
+     */
+    function populateNoteSuggestions() {
+      const logs = getLogs();
+      const uniqueNotes = [];
+      for (let i = 0; i < logs.length; i++) {
+        const note = logs[i].notes;
+        if (note && !uniqueNotes.includes(note)) uniqueNotes.push(note);
+        if (uniqueNotes.length >= 5) break;
+      }
+      DOM.noteSuggestions.innerHTML = uniqueNotes.map((n) => `<option value="${escapeHTML(n)}">`).join("");
+    }
+
+    /**
+     * Initializes log validation filters (prevents submission under 60 seconds).
+     */
+    function openSubmitModal() {
+      const wSec = Math.floor(getCurrentWorkSeconds());
+      const bSec = Math.floor(getCurrentBreakSeconds());
+      if (wSec <= 0) return;
+      pendingSubmitData = { workSec: wSec, breakSec: bSec, loginTs: state.loginTimestamp };
+      if (wSec < 60) {
+        DOM.ghostModal.style.display = "flex";
+      } else {
+        proceedToSubmitModal();
+      }
+    }
+
+    function closeGhostModal() {
+      DOM.ghostModal.style.display = "none";
+      pendingSubmitData = null;
+    }
+
+    function confirmGhost() {
+      DOM.ghostModal.style.display = "none";
+      proceedToSubmitModal();
+    }
+
+    function proceedToSubmitModal() {
+      populateNoteSuggestions();
+      DOM.submitModal.style.display = "flex";
+      setTimeout(() => DOM.modalShiftNotes.focus(), 100);
+    }
+
+    function closeSubmitModal() {
+      DOM.submitModal.style.display = "none";
+      DOM.modalShiftNotes.value = "";
+      pendingSubmitData = null;
+    }
+
+    function openNoteModal(noteText) {
+      DOM.noteModalText.textContent = noteText;
+      DOM.noteModal.style.display = "flex";
+    }
+
+    function closeNoteModal() {
+      DOM.noteModal.style.display = "none";
+    }
+
+    function confirmSubmit() {
+      const notes = DOM.modalShiftNotes.value.trim();
+      DOM.submitModal.style.display = "none";
+      DOM.modalShiftNotes.value = "";
+      executeSubmit(null, notes);
+    }
+
+    /**
+     * Serializes session accumulation into storage shift logs.
+     * 
+     * @param {Event} e - DOM event target.
+     * @param {string} forceNotes - Task notes comments.
+     * @param {string} overrideDate - Forced MM/DD/YY date bounds mapping.
+     */
+    function executeSubmit(e, forceNotes = "", overrideDate = null) {
+      commitCrashRecoveryTime();
+      const workSeconds = pendingSubmitData ? pendingSubmitData.workSec : Math.floor(state.workAccumulated);
+      const breakSeconds = pendingSubmitData ? pendingSubmitData.breakSec : Math.floor(state.breakAccumulated);
+      const loginTs = pendingSubmitData ? pendingSubmitData.loginTs : state.loginTimestamp;
+
+      pendingSubmitData = null;
+      if (workSeconds <= 0) return;
+
+      const goal = getGoalSeconds();
+      const diff = workSeconds - goal;
+      const entryDate = overrideDate || state.activeDate || getPSTDate();
+      const loginTime = loginTs ? loginFormatter.format(new Date(loginTs)) : "--";
+      const logoutTime = pstFormatter.format(new Date(getTrueTime()));
+
+      const logs = getLogs();
+      const displayDate = entryDate.replace(/\/20(\d{2})$/, "/$1");
+      const [m, d, y] = entryDate.split("/");
+      const fullYear = y.length === 2 ? `20${y}` : y;
+      const epochMs = Date.UTC(parseInt(fullYear), parseInt(m) - 1, parseInt(d));
+
+      const entry = {
+        date: entryDate,
+        displayDate,
+        epochMs,
+        login: loginTime,
+        logout: logoutTime,
+        workSec: workSeconds,
+        breakSec: breakSeconds,
+        status: diff >= 0 ? "OVER" : "UNDER",
+        diff: formatDuration(Math.abs(diff)),
+        notes: forceNotes,
+        dayGoal: goal,
+      };
+
+      entry.searchStr = `${displayDate} ${entryDate} ${loginTime} ${logoutTime} ${forceNotes}`.toLowerCase();
+
+      // Backup active states and prepend shift to log list
+      lastStateBackup = JSON.parse(JSON.stringify(state));
+      logs.unshift(entry);
+      saveLogs(logs);
+      resetSession();
+      renderLogbook();
+      renderInsights();
+
+      // Pop Undo Toast banner for 7 seconds
+      const toast = document.getElementById("undo-toast");
+      toast.style.bottom = "30px";
+      clearTimeout(undoTimeout);
+      undoTimeout = setTimeout(() => {
+        toast.style.bottom = "-100px";
+        lastStateBackup = null;
+      }, 7000);
+    }
+
+    // Action listener to revert EOD submissions
+    document.getElementById("undo-btn").addEventListener("click", () => {
+      if (!lastStateBackup) return;
+      state = lastStateBackup;
+      saveState();
+
+      const logs = getLogs();
+      logs.shift();
+      saveLogs(logs);
+
+      renderStaticUI();
+      renderTimersOnly();
+      renderLogbook();
+      renderInsights();
+
+      document.getElementById("undo-toast").style.bottom = "-100px";
+      lastStateBackup = null;
+    });
+
+    /*==========================================================================
+     * 12. IDLE AUDITING SYSTEMS
+     * =========================================================================*/
+
+    /**
+     * Pauses active timers and locks application under Inactivity mode if thresholds pass.
+     * @param {number} timeOfIdle - Epoch timestamp when state went idle.
+     */
+    function triggerIdleLock(timeOfIdle) {
+      commitCrashRecoveryTime(timeOfIdle);
+      state.preIdleMode = state.currentMode;
+      state.currentMode = null;
+      state.workStartTime = null;
+      state.breakStartTime = null;
+      state.idleStart = timeOfIdle;
+      state.idleLock = true;
+      saveState();
+      renderStaticUI();
+      renderTimersOnly(new Date(timeOfIdle));
+    }
+
+    /**
+     * Resolves pending locked idle times.
+     * @param {string} choice - 'work' or 'break' mapping target.
+     */
+    function resolveIdle(choice) {
+      const now = getTrueTime();
+      const idleDurationSec = (now - state.idleStart) / 1000;
+      if (choice === "work") {
+        state.workAccumulated += idleDurationSec;
+        if (!state.loginTimestamp) {
+          state.loginTimestamp = now - idleDurationSec * 1000;
+        }
+      } else if (choice === "break") {
+        state.breakAccumulated += idleDurationSec;
+      }
+      state.idleLock = false;
+      state.idleStart = null;
+      state.preIdleMode = null;
+      lastActivity = now;
+      state.lastActivity = now;
+      saveState();
+      document.getElementById("idle-modal").style.display = "none";
+      switchMode("work");
+    }
+
+    /**
+     * Wipes live transaction memory and boots active workspace clean.
+     */
+    function resetSession() {
+      state = {
+        workAccumulated: 0,
+        breakAccumulated: 0,
+        currentMode: null,
+        workStartTime: null,
+        breakStartTime: null,
+        loginTimestamp: null,
+        activeDate: getPSTDate(),
+        idleLock: false,
+        idleStart: null,
+        preIdleMode: null,
+        goalNotified: false,
+        lastActivity: getTrueTime(),
+      };
+      lastActivity = getTrueTime();
+      saveState();
+      DOM.submitModal.style.display = "none";
+      DOM.ghostModal.style.display = "none";
+      DOM.noteModal.style.display = "none";
+      document.getElementById("idle-modal").style.display = "none";
+      renderStaticUI();
+      renderTimersOnly();
+    }
+
+    /*==========================================================================
+     * 13. LOGBOOK & VIRTUAL WINDOWING SCROLL LIST (O(1) SCROLL LOOKUPS)
+     * =========================================================================*/
+
+    /**
+     * Generates structural HTML templates representing historical logs.
+     */
+    function generateLogRow(log, index) {
+      const hasNote = !!log.notes;
+      const noteIconClass = hasNote ? "icon-btn note-active" : "icon-btn";
+      const displayStatus = log.status === "OVER" ? "Over" : "Under";
+      const noteBtnAttr = hasNote
+        ? `data-action="view-note" data-index="${index}" title="View Note"`
+        : `title="No Note" disabled style="opacity: 0.3; cursor: not-allowed;"`;
+
+      const logDate = new Date(log.epochMs);
+      const dayNum = logDate.getUTCDay();
+      const isWeekend = dayNum === 0 || dayNum === 6;
+
+      const weekendBadge = isWeekend
+        ? `<span style="font-size: 0.5rem; color: var(--text-muted); border: 1px solid var(--border-main); padding: 1px 4px; border-radius: 4px; margin-left: 8px; font-weight: 400; opacity: 0.7;">Weekend</span>`
+        : "";
+
+      // Calculate friendly delta dynamically to maintain full database backward compatibility
+      const rawDeltaSec = Math.abs(log.workSec - (log.dayGoal || 8 * 3600));
+      const friendlyDiff = formatFriendlyDuration(rawDeltaSec, "0m");
+
+      return `
+        <div class="log-row">
+            <!-- TOP ROW -->
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center;">
+                    <strong style="font-size: 0.8rem; letter-spacing: -0.02em;">${log.displayDate}</strong>
+                    <span style="font-size: 0.65rem; color: var(--text-muted); margin-left: 8px; font-family: 'JetBrains Mono';">${log.login} - ${log.logout}</span>
+                    ${weekendBadge}
+                </div>
+                <span class="tag ${log.status === "OVER" ? "tag-over" : "tag-under"}" style="padding: 2px 6px; font-size: 0.6rem;">${displayStatus}: ${friendlyDiff}</span>
+            </div>
+            
+            <!-- BOTTOM ROW -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                <div style="display: flex; gap: 12px; font-size: 0.75rem; font-family: 'JetBrains Mono';">
+                    <span style="display: inline-block; min-width: 75px;"><span style="color: var(--accent-work); font-weight: bold;">W:</span> ${formatFriendlyDuration(log.workSec)}</span>
+                    <span style="display: inline-block; min-width: 65px;"><span style="color: var(--accent-break); font-weight: bold;">B:</span> ${formatFriendlyDuration(log.breakSec)}</span>
+                </div>
+                <div class="icon-actions" style="gap: 4px;">
+                    <button class="${noteIconClass}" ${noteBtnAttr} style="padding: 4px; width: 28px; height: 28px;">${SVGs.note}</button>
+                    <button title="Copy Log" class="icon-btn" data-action="copy" data-index="${index}" style="padding: 4px; width: 28px; height: 28px;">${SVGs.copy}</button>
+                    <button title="Edit Times" class="icon-btn" data-action="edit" data-index="${index}" style="padding: 4px; width: 28px; height: 28px;">${SVGs.edit}</button>
+                    <button title="Delete Shift" class="icon-btn danger-text" data-action="delete" data-index="${index}" style="padding: 4px; width: 28px; height: 28px;">${SVGs.trash}</button>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    // Delegated actions dispatcher inside scrolling logs area
+    DOM.logContainer.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      const action = btn.dataset.action;
+      if (!action) return;
+      const index = parseInt(btn.dataset.index);
+      if (action === "copy") {
+        copySingleShift(index, btn);
+      } else if (action === "edit") {
+        editSingleShift(index);
+      } else if (action === "delete") {
+        deleteSingleShift(index);
+      } else if (action === "view-note") {
+        const logs = getLogs();
+        if (logs[index] && logs[index].notes) openNoteModal(logs[index].notes);
+      }
+    });
+
+    /**
+     * Changes active filtering badge highlight flags on advanced filters toggle.
+     */
+    function updateFilterIconState() {
+      const timeFilter = DOM.filterTime.value !== "ALL";
+      const statusFilter = DOM.filterStatus.value !== "ALL";
+      const notesFilter = DOM.filterNotes.checked;
+      const dateStart = document.getElementById("filter-date-start").value !== "";
+      const dateEnd = document.getElementById("filter-date-end").value !== "";
+      const hoursFilter = DOM.filterHoursOp.value !== "ALL";
+
+      const isActive = timeFilter || statusFilter || notesFilter || dateStart || dateEnd || hoursFilter;
+      const btn = document.getElementById("filter-toggle-btn");
+      if (isActive) {
+        btn.classList.add("filter-active");
+      } else {
+        btn.classList.remove("filter-active");
+      }
+    }
+
+    /**
+     * Returns logs array filtered by user preferences.
+     * @returns {Array} Filtered list.
+     */
+    function getFilteredLogs() {
+      const logs = getLogs();
+      const timeFilter = DOM.filterTime.value;
+      const status = DOM.filterStatus.value;
+      const hasNotes = DOM.filterNotes.checked;
+      const dateStartVal = document.getElementById("filter-date-start").value;
+      const dateEndVal = document.getElementById("filter-date-end").value;
+      const hoursOp = DOM.filterHoursOp.value;
+      const hoursVal = parseFloat(DOM.filterHoursVal.value) || 0;
+
+      if (
+        timeFilter === "ALL" &&
+        status === "ALL" &&
+        !hasNotes &&
+        !dateStartVal &&
+        !dateEndVal &&
+        hoursOp === "ALL"
+      ) {
+        return logs;
+      }
+
+      const todayStr = getPSTDate();
+      const now = new Date(getTrueTime());
+      const nowUTC = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+      const day = nowUTC.getUTCDay();
+      const diffToMonday = day === 0 ? -6 : 1 - day;
+      const mondayUTC = new Date(nowUTC);
+      mondayUTC.setUTCDate(nowUTC.getUTCDate() + diffToMonday);
+      const weekStartMs = mondayUTC.getTime();
+      const monthStartUTC = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1));
+      const monthStartMs = monthStartUTC.getTime();
+
+      let startMs = dateStartVal ? new Date(dateStartVal).getTime() : null;
+      let endMs = dateEndVal ? new Date(dateEndVal).getTime() : null;
+
+      return logs.filter((l) => {
+        let matchTime = true;
+        if (timeFilter === "TODAY") matchTime = l.date === todayStr;
+        else if (timeFilter === "WEEK") matchTime = l.epochMs >= weekStartMs;
+        else if (timeFilter === "MONTH") matchTime = l.epochMs >= monthStartMs;
+
+        const matchStatus = status === "ALL" || l.status === status;
+        const matchNotes = !hasNotes || (l.notes && l.notes.trim() !== "");
+
+        let matchDate = true;
+        if (startMs || endMs) {
+          if (startMs && l.epochMs < startMs) matchDate = false;
+          if (endMs && l.epochMs > endMs) matchDate = false;
+        }
+
+        let matchHours = true;
+        if (hoursOp !== "ALL") {
+          const workHours = l.workSec / 3600;
+          if (hoursOp === "MORE") matchHours = workHours >= hoursVal;
+          if (hoursOp === "LESS") matchHours = workHours <= hoursVal;
+        }
+        return matchTime && matchStatus && matchNotes && matchDate && matchHours;
+      });
+    }
+
+    // Performance window listener bound to view port resize adjustments
+    window.addEventListener(
+      "resize",
+      debounce(() => {
+        cachedBaseFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+        renderLogbook();
+      }, 150)
+    );
+
+    function getDynamicItemHeight() {
+      return 4.8 * cachedBaseFontSize;
+    }
+
+    document.getElementById("tab-logbook").addEventListener("scroll", () => {
+      renderVirtualVisibleItems();
+    });
+
+    /**
+     * Renders virtual elements visible in active scroll windows. Prevents excessive DOM nodes creation.
+     */
+    function renderVirtualVisibleItems() {
+      if (virtualScrollLogs.length === 0) return;
+      const scrollContainer = document.getElementById("tab-logbook");
+      const scrollTop = scrollContainer.scrollTop;
+      const viewportHeight = scrollContainer.clientHeight;
+      const itemHeight = getDynamicItemHeight();
+
+      const overscan = 5;
+      const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
+      const endIndex = Math.min(
+        virtualScrollLogs.length - 1,
+        Math.ceil((scrollTop + viewportHeight) / itemHeight) + overscan
+      );
+
+      let html = "";
+      for (let i = startIndex; i <= endIndex; i++) {
+        const log = virtualScrollLogs[i];
+        const top = i * itemHeight;
+        // Optimization: Pre-assigned indexes avoid O(N) linear array iterations
+        const rowHtml = generateLogRow(log, log._idx);
+        html += rowHtml.replace('class="log-row"', `class="log-row" style="top: ${top}px;"`);
+      }
+      DOM.logContainer.innerHTML = html;
+    }
+
+    /**
+     * Pre-calculates virtual boundary frames and triggers visibility updates.
+     */
+    function renderLogbook() {
+      updateFilterIconState();
+      virtualScrollLogs = getFilteredLogs();
+      const itemHeight = getDynamicItemHeight();
+      const countDisplay = document.getElementById("log-count-display");
+      if (countDisplay) {
+        countDisplay.textContent = `${virtualScrollLogs.length.toLocaleString()} log${virtualScrollLogs.length !== 1 ? "s" : ""
+          }`;
+      }
+
+      if (virtualScrollLogs.length === 0) {
+        DOM.logContainer.style.height = "auto";
+        DOM.logContainer.innerHTML = `
+          <div style="text-align:center; padding: 60px 20px; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 10px;">
+            <svg viewBox="0 0 24 24" width="40" height="40" stroke="currentColor" stroke-width="1.5" fill="none" style="opacity: 0.5;">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span style="font-size: 0.85rem; font-weight: 600;">No shifts found</span>
+            <span style="font-size: 0.75rem; opacity: 0.7;">Adjust your filters or log some time!</span>
+          </div>`;
+      } else {
+        DOM.logContainer.style.height = `${virtualScrollLogs.length * itemHeight}px`;
+        renderVirtualVisibleItems();
+      }
+    }
+
+    /*==========================================================================
+     * 14. DATA ANALYTICS & WEEKLY PERFORMANCE CHARTS (INSIGHTS)
+     * =========================================================================*/
+
+    /**
+     * Compiles weekly data aggregates. Computes daily goals, overtime margins,
+     * paces, and paints day segments.
+     */
+    function renderInsights() {
+      const y = displayBaseDate.getFullYear();
+      const m = displayBaseDate.getMonth();
+      const d_val = displayBaseDate.getDate();
+      const dObj = new Date(Date.UTC(y, m, d_val));
+      const day = dObj.getUTCDay();
+      const diffToMonday = day === 0 ? -6 : 1 - day;
+      const mondayUTC = new Date(dObj);
+      mondayUTC.setUTCDate(dObj.getUTCDate() + diffToMonday);
+      mondayUTC.setUTCHours(0, 0, 0, 0);
+      const weekStartMs = mondayUTC.getTime();
+
+      const todayStr = getPSTDate();
+      const weeklyLogs = weeklyCache.get(weekStartMs) || [];
+      const logsByDate = {};
+      for (let i = 0; i < weeklyLogs.length; i++) {
+        const l = weeklyLogs[i];
+        if (!logsByDate[l.displayDate]) {
+          logsByDate[l.displayDate] = { w: 0, b: 0, goal: 0 };
+        }
+        logsByDate[l.displayDate].w += l.workSec;
+        logsByDate[l.displayDate].b += l.breakSec;
+        if (l.dayGoal) {
+          logsByDate[l.displayDate].goal = l.dayGoal;
+        }
+      }
+
+      const shortMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      setText(
+        DOM.weekMonthLabel,
+        `Week of ${shortMonths[mondayUTC.getUTCMonth()]} ${mondayUTC.getUTCDate()}, ${mondayUTC.getUTCFullYear()}`
+      );
+
+      let totalW_MonFri = 0; // Cumulative Monday-Friday work time (40 Hours baseline target boundary)
+      let totalB_AllWeek = 0; // Total break time
+      let breakdownHTML = "";
+      const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+      const reusableDate = new Date(mondayUTC);
+      const dailyGoalSec = getGoalSeconds();
+      const fixedWeeklyGoalSec = 40 * 3600;
+
+      for (let i = 0; i < 7; i++) {
+        reusableDate.setTime(mondayUTC.getTime());
+        reusableDate.setUTCDate(mondayUTC.getUTCDate() + i);
+        const dayOfWeekIndex = reusableDate.getUTCDay();
+
+        const dateStr = `${String(reusableDate.getUTCMonth() + 1).padStart(2, "0")}/${String(
+          reusableDate.getUTCDate()
+        ).padStart(2, "0")}/${reusableDate.getUTCFullYear().toString().slice(-2)}`;
+        const dayW = logsByDate[dateStr] ? logsByDate[dateStr].w : 0;
+        const dayB = logsByDate[dateStr] ? logsByDate[dateStr].b : 0;
+
+        if (dayOfWeekIndex >= 1 && dayOfWeekIndex <= 5) {
+          totalW_MonFri += dayW;
+        }
+        totalB_AllWeek += dayB;
+
+        const isToday = dateStr === todayStr;
+        const isWeekend = dayOfWeekIndex === 0 || dayOfWeekIndex === 6;
+
+        const rowStyle = `border-left: 3px solid ${isToday ? "var(--accent-blue)" : "transparent"
+          }; background: ${isToday ? "rgba(96, 165, 250, 0.08)" : "transparent"}; border-radius: 8px; margin-bottom: 2px;`;
+
+        let statusBadge = "";
+        if (dayW > 0 || dayB > 0) {
+          const isOver = dayW >= dailyGoalSec;
+          const badgeColor = isOver ? "var(--accent-work)" : "var(--accent-warning)";
+          statusBadge = `<span style="border: 1px solid ${badgeColor}; color: ${badgeColor}; border-radius: 4px; padding: 1px 3px; font-size: 0.5rem; margin-left: 5px; font-weight: 800; line-height: 1;">${isOver ? "O" : "U"
+            }</span>`;
+        }
+
+        const weekendBadge = isWeekend
+          ? `<span style="font-size: 0.55rem; color: var(--text-muted); opacity: 0.7; margin-left: 8px; font-weight: 500; border: 1px solid var(--border-main); padding: 1px 6px; border-radius: 4px; background: rgba(255,255,255,0.03); white-space: nowrap; letter-spacing: 0.1px;">Weekend (Not Counted)</span>`
+          : "";
+
+        if (!isWeekend || dayW > 0 || dayB > 0) {
+          breakdownHTML += `
+          <div class="breakdown-row" style="flex-direction: row; align-items: center; justify-content: space-between; padding: 10px 12px; ${rowStyle}">
+            <div style="display: flex; align-items: center; white-space: nowrap; overflow: hidden;">
+              <span style="font-weight: ${isToday ? "700" : "400"}; color: ${isToday ? "var(--text-main)" : "var(--text-muted)"
+            }; font-size: 0.8rem;">
+                ${dayNames[dayOfWeekIndex]} <span style="opacity: 0.5; font-size: 0.7rem; font-weight: 400;">(${String(
+              reusableDate.getUTCMonth() + 1
+            ).padStart(2, "0")}/${String(reusableDate.getUTCDate()).padStart(2, "0")})</span>
+              </span>
+              ${statusBadge}
+              ${weekendBadge}
+            </div>
+            <div style="display: flex; gap: 12px; font-family: 'JetBrains Mono'; font-size: 0.75rem; flex-shrink: 0; color: var(--text-main);">
+              <span style="display: inline-block; min-width: 75px;">
+                <span style="color:var(--accent-work); font-weight: 700;">W:</span> ${formatFriendlyDuration(dayW)}
+              </span>
+              <span style="display: inline-block; min-width: 65px;">
+                <span style="color:var(--accent-break); font-weight: 700;">B:</span> ${formatFriendlyDuration(dayB)}
+              </span>
+            </div>
+          </div>`;
+        }
+      }
+
+      // Progress Card Visual Calculations
+      const progressCard = document.getElementById("weekly-progress-card");
+      const summaryText = document.getElementById("weekly-summary-text");
+      const percentText = document.getElementById("weekly-progress-percent");
+      const weekMsg = document.getElementById("weekly-status-msg");
+
+      const nowPST = getPSTDateObj();
+      const nowDay = nowPST.getDay();
+      const nowDiffToMonday = nowDay === 0 ? -6 : 1 - nowDay;
+      const currentMonday = new Date(nowPST);
+      currentMonday.setDate(nowPST.getDate() + nowDiffToMonday);
+      currentMonday.setHours(0, 0, 0, 0);
+      const currentWeekStartMs = Date.UTC(
+        currentMonday.getFullYear(),
+        currentMonday.getMonth(),
+        currentMonday.getDate()
+      );
+
+      document.querySelectorAll(".progress-segment").forEach((seg) => {
+        seg.classList.remove("is-today");
+        seg.querySelector(".progress-segment-fill").style.transform = "scaleX(0)";
+      });
+
+      // Update segment bars (Monday through Friday)
+      for (let i = 0; i < 5; i++) {
+        const dayDate = new Date(mondayUTC);
+        dayDate.setUTCDate(mondayUTC.getUTCDate() + i);
+        const dateStr = `${String(dayDate.getUTCMonth() + 1).padStart(2, "0")}/${String(
+          dayDate.getUTCDate()
+        ).padStart(2, "0")}/${dayDate.getUTCFullYear().toString().slice(-2)}`;
+        const dayWorkSeconds = logsByDate[dateStr] ? logsByDate[dateStr].w : 0;
+
+        const isToday = dateStr === todayStr;
+        const savedGoal = logsByDate[dateStr] ? logsByDate[dateStr].goal : 0;
+        const denominator = isToday ? dailyGoalSec : savedGoal || 28800;
+
+        const segment = document.querySelector(`.progress-segment[data-day="${i + 1}"]`);
+        if (segment) {
+          const fillScale = Math.min(dayWorkSeconds / denominator, 1);
+          segment.querySelector(".progress-segment-fill").style.transform = `scaleX(${fillScale})`;
+          if (dayWorkSeconds >= denominator && dayWorkSeconds > 0) {
+            segment.querySelector(".progress-segment-fill").style.background = "var(--accent-work)";
+          } else {
+            segment.querySelector(".progress-segment-fill").style.background =
+              "linear-gradient(135deg, var(--accent-blue) 0%, #4f46e5 100%)";
+          }
+          if (weekStartMs === currentWeekStartMs && i + 1 === (nowDay === 0 ? 7 : nowDay)) {
+            segment.classList.add("is-today");
+          }
+        }
+      }
+
+      const totalPercent = Math.min((totalW_MonFri / fixedWeeklyGoalSec) * 100, 100);
+      setText(summaryText, `${formatFriendlyDuration(totalW_MonFri, "0h")} / 40h`);
+      setText(percentText, `(${totalPercent.toFixed(0)}%)`);
+
+      if (totalW_MonFri >= fixedWeeklyGoalSec) {
+        progressCard.classList.add("goal-reached");
+      } else {
+        progressCard.classList.remove("goal-reached");
+      }
+
+      // Dynamic daily pace calculation message
+      if (weekMsg) {
+        const remainingSec = Math.max(0, fixedWeeklyGoalSec - totalW_MonFri);
+
+        if (weekStartMs > currentWeekStartMs) {
+          weekMsg.textContent = "Upcoming Week";
+          weekMsg.style.color = "var(--text-muted)";
+        } else if (remainingSec > 0) {
+          if (weekStartMs === currentWeekStartMs) {
+            let todayIdx = nowDay === 0 ? 7 : nowDay;
+            if (todayIdx <= 5) {
+              const daysRemaining = 5 - todayIdx + 1;
+              const paceSec = remainingSec / daysRemaining;
+              const paceH = Math.floor(paceSec / 3600);
+              const paceM = Math.round((paceSec % 3600) / 60);
+              weekMsg.textContent = `Pace Needed: ${paceH}h ${paceM}m / day (to hit 40h)`;
+            } else {
+              weekMsg.textContent = "Weekend: Goal not reached.";
+            }
+            weekMsg.style.color = "var(--text-muted)";
+          } else {
+            weekMsg.textContent = "Week Finished: Goal not reached.";
+            weekMsg.style.color = "var(--text-muted)";
+          }
+        } else {
+          weekMsg.textContent = `40h Goal reached! Overtime: ${formatFriendlyDuration(totalW_MonFri - fixedWeeklyGoalSec, "0m")}`;
+          weekMsg.style.color = "var(--accent-work)";
+        }
+      }
+
+      DOM.weeklyBreakdown.innerHTML = breakdownHTML;
+      setText(DOM.weeklyBreak, formatFriendlyDuration(totalB_AllWeek, "0m"));
+    }
+
+    /*==========================================================================
+     * 15. EDIT AND DELETE ACTION PROCEDURES
+     * =========================================================================*/
+    const debouncedRenderLogbook = debounce(() => {
+      renderLogbook();
+    }, 300);
+
+    DOM.filterTime.addEventListener("change", renderLogbook);
+    DOM.filterStatus.addEventListener("change", renderLogbook);
+    DOM.filterNotes.addEventListener("change", renderLogbook);
+    document.getElementById("filter-date-start").addEventListener("change", renderLogbook);
+    document.getElementById("filter-date-end").addEventListener("change", renderLogbook);
+    DOM.filterHoursVal.addEventListener("input", debouncedRenderLogbook);
+
+    /**
+     * populates log editor values.
+     */
+    function editSingleShift(index) {
+      const logs = getLogs();
+      const log = logs[index];
+      if (!log) return;
+      editingLogIndex = index;
+      document.getElementById("edit-date").value = log.date;
+      document.getElementById("edit-work").value = formatDuration(log.workSec);
+      document.getElementById("edit-break").value = formatDuration(log.breakSec);
+      document.getElementById("edit-notes").value = log.notes || "";
+      document.getElementById("edit-modal").style.display = "flex";
+    }
+
+    function closeEditModal() {
+      document.getElementById("edit-modal").style.display = "none";
+      editingLogIndex = -1;
+    }
+
+    /**
+     * Parses and updates structural values changes in shift log.
+     */
+    function saveEditModal() {
+      if (editingLogIndex === -1) return;
+      const logs = getLogs();
+      const log = logs[editingLogIndex];
+      if (!log) return;
+
+      const newDate = document.getElementById("edit-date").value.trim();
+      const newWork = document.getElementById("edit-work").value.trim();
+      const newBreak = document.getElementById("edit-break").value.trim();
+      const newNotes = document.getElementById("edit-notes").value.trim();
+
+      const parseTime = (str) => {
+        const p = str.split(":");
+        return p.length === 3 ? parseInt(p[0]) * 3600 + parseInt(p[1]) * 60 + parseInt(p[2]) : null;
+      };
+      const wSec = parseTime(newWork);
+      const bSec = parseTime(newBreak);
+
+      if (wSec !== null && bSec !== null && newDate.match(/^\d{1,2}\/\d{1,2}\/\d{2}$/)) {
+        log.date = newDate;
+        log.displayDate = newDate.replace(/\/20(\d{2})$/, "/$1");
+        log.workSec = wSec;
+        log.breakSec = bSec;
+        const goal = typeof getGoalSeconds === "function" ? getGoalSeconds() : 8 * 3600;
+        log.status = wSec - goal >= 0 ? "OVER" : "UNDER";
+        log.diff = formatDuration(Math.abs(wSec - goal));
+        const [m, d, y] = newDate.split("/");
+        const fullYear = y.length === 2 ? `20${y}` : y;
+        log.epochMs = Date.UTC(parseInt(fullYear), parseInt(m) - 1, parseInt(d));
+        log.notes = newNotes;
+        log.searchStr = `${log.displayDate} ${log.date} ${log.notes || ""}`.toLowerCase();
+        logs[editingLogIndex] = log;
+        saveLogs(logs);
+        renderLogbook();
+        renderInsights();
+        closeEditModal();
+        showAppToast("Shift updated successfully.");
+      } else {
+        showAppToast("Invalid format. Use MM/DD/YY and HH:MM:SS.");
+      }
+    }
+
+    /**
+     * Removes structural log element.
+     */
+    function deleteSingleShift(index) {
+      openConfirmModal(
+        "Delete Shift",
+        "Are you sure you want to delete this shift? This cannot be undone.",
+        () => {
+          const logs = getLogs();
+          logs.splice(index, 1);
+          saveLogs(logs);
+          renderLogbook();
+          renderInsights();
+          showAppToast("Shift deleted.");
+        },
+        true
+      );
+    }
+
+    /*==========================================================================
+     * 16. DATA MIGRATIONS & BACKUP UTILITIES (CSV/JSON/TEXT)
+     * =========================================================================*/
+
+    /**
+     * Serializes history log records into flat CSV report documents.
+     */
+    function exportCSV() {
+      const logs = getFilteredLogs();
+      if (!logs.length) return;
+
+      let csv = "Date,Login,Logout,Work Time,Work (Hrs),Break Time,Net Delta (Hrs),Notes\n";
+
+      csv += logs
+        .map((l) => {
+          const workDec = (l.workSec / 3600).toFixed(2);
+          const goalSec = typeof getGoalSeconds === "function" ? getGoalSeconds() : 8 * 3600;
+          const deltaDec = ((l.status === "OVER" ? 1 : -1) * (Math.abs(l.workSec - goalSec) / 3600)).toFixed(2);
+          const notes = l.notes ? l.notes.replace(/"/g, '""').replace(/\n/g, " ") : "";
+
+          return `"${l.date}","${l.login}","${l.logout}","${formatDuration(
+            l.workSec
+          )}","${workDec}","${formatDuration(l.breakSec)}","${deltaDec}","${notes}"`;
+        })
+        .join("\n");
+
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+      a.download = `Production_Report.csv`;
+      a.click();
+    }
+
+    /**
+     * Exports full operational logs and state settings in clean JSON backup files.
+     */
+    function exportJSON() {
+      const data = {
+        state,
+        logs: getLogs(),
+        goalH: localStorage.getItem(GOAL_H_KEY) || 8,
+        goalM: localStorage.getItem(GOAL_M_KEY) || 0,
+      };
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+      a.download = `Backup_${getPSTDate().replace(/\//g, "-")}.json`;
+      a.click();
+    }
+
+    /**
+     * restructures and uploads database logs backup files.
+     * @param {Event} e - Native file input upload target.
+     */
+    function importJSON(e) {
+      if (!e.target.files[0]) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const data = JSON.parse(event.target.result);
+          if (data.state) {
+            state = data.state;
+            saveState();
+          }
+          if (data.goalH !== undefined) {
+            localStorage.setItem(GOAL_H_KEY, data.goalH);
+            DOM.goalHours.value = data.goalH;
+          }
+          if (data.goalM !== undefined) {
+            localStorage.setItem(GOAL_M_KEY, data.goalM);
+            DOM.goalMins.value = data.goalM;
+          }
+          if (data.logs) {
+            data.logs.forEach((l) => {
+              l.displayDate = l.date.replace(/\/20(\d{2})$/, "/$1");
+              const [m, d, y] = l.date.split("/");
+              const fullY = y.length === 2 ? `20${y}` : y;
+              l.epochMs = Date.UTC(parseInt(fullY), parseInt(m) - 1, parseInt(d));
+            });
+            saveLogs(data.logs);
+          }
+          showAppToast("Restored successfully.");
+          renderStaticUI();
+          renderTimersOnly();
+          renderLogbook();
+          renderInsights();
+        } catch (err) {
+          showAppToast("Error restoring data.");
+        }
+      };
+      reader.readAsText(e.target.files[0]);
+    }
+
+    /**
+     * Copies a detailed representation text description of a single shift onto clipboards.
+     */
+    function copySingleShift(index, btnElement) {
+      const log = getLogs()[index];
+      if (!log) return;
+
+      let txt = `Shift Log: ${log.date}\n`;
+      txt += `Time: ${log.login} - ${log.logout}\n`;
+      txt += `Work Time: ${formatDuration(log.workSec)}\n`;
+      txt += `Break Time: ${formatDuration(log.breakSec)}\n`;
+      if (log.notes) txt += `Notes: ${log.notes}`;
+
+      navigator.clipboard.writeText(txt).then(() => {
+        btnElement.innerHTML = `<span style="font-size:0.45rem; font-weight:bold;">DONE</span>`;
+        setTimeout(() => (btnElement.innerHTML = SVGs.copy), 1500);
+      });
+    }
+
+    /**
+     * Copies full filtered summaries formatted inside tabular textual shapes.
+     */
+    function copyLog() {
+      const logs = getFilteredLogs();
+      if (!logs.length) return;
+
+      const grp = {};
+      logs.forEach((l) => {
+        if (!grp[l.date]) {
+          grp[l.date] = { shifts: [], w: 0, b: 0 };
+        }
+        grp[l.date].shifts.push(l);
+        grp[l.date].w += l.workSec;
+        grp[l.date].b += l.breakSec;
+      });
+
+      const txt = Object.keys(grp)
+        .map((d) => {
+          let out = `📅 ${d}\n`;
+          grp[d].shifts.forEach((s, i) => {
+            out += `  • Shift ${i + 1}: ${s.login} - ${s.logout} (W: ${formatDuration(s.workSec)} | B: ${formatDuration(
+              s.breakSec
+            )})${s.notes ? " | Note: " + s.notes : ""}\n`;
+          });
+
+          const warning = grp[d].w < 7 * 3600 ? " ⚠️ (Under 7h)" : "";
+          out += `  ---\n`;
+          out += `  ✅ Total Work: ${formatDuration(grp[d].w)}${warning}\n`;
+          out += `  ☕ Total Break: ${formatDuration(grp[d].b)}\n`;
+          out += `  🏢 Total Logged: ${formatDuration(grp[d].w + grp[d].b)}`;
+          return out;
+        })
+        .join("\n\n");
+
+      navigator.clipboard.writeText(txt).then(() => showAppToast("Copied to clipboard."));
+    }
+
+    /**
+     * Triggers destructive cleanup operations to factory state.
+     */
+    function clearAllData() {
+      openConfirmModal(
+        "Factory Reset",
+        "Are you sure you want to permanently delete ALL logs and settings? This is irreversible.",
+        () => {
+          saveLogs([]);
+          localStorage.removeItem(STATE_KEY);
+          resetSession();
+          renderLogbook();
+          renderInsights();
+          showAppToast("All data wiped.");
+        },
+        true
+      );
+    }
+
+    /*==========================================================================
+     * 17. RECURRING CHRONO LOOPS & SERVICE ALERTS
+     * =========================================================================*/
+
+    /**
+     * Prevents overnight shift breakups. If a user begins working at 11 PM Monday
+     * and logs out at 4 AM Tuesday, the entire shift stays mapped safely inside Monday.
+     */
+    function checkMidnightReset(now = new Date(getTrueTime())) {
+      const currentDatePST = pstDateFormatter.format(now);
+
+      if (!state.activeDate) {
+        state.activeDate = currentDatePST;
+        saveState();
+        return;
+      }
+
+      if (state.activeDate !== currentDatePST) {
+        // Flipping tracking bounds only if active timers are not running
+        if (state.currentMode === null && state.workAccumulated < 60) {
+          state.activeDate = currentDatePST;
+          saveState();
+        }
+      }
+    }
+
+    /**
+     * Central master timing execution cycle running every single second.
+     */
+    function tick() {
+      const now = new Date(getTrueTime());
+      const nowMs = now.getTime();
+
+      // Halt processing cycles if current master tab lock modal overlay is active
+      if (document.getElementById("tab-conflict-modal").style.display === "flex") {
+        setTimeout(tick, 1000 - (nowMs % 1000));
+        return;
+      }
+
+      // Idle lockout trigger check
+      if (!state.idleLock && state.currentMode !== null) {
+        if (nowMs - lastActivity > IDLE_THRESHOLD) {
+          triggerIdleLock(lastActivity);
+        }
+      }
+
+      // Repaint idle duration displays
+      if (state.idleLock) {
+        document.getElementById("idle-modal").style.display = "flex";
+        setText(document.getElementById("idle-duration-text"), formatDuration((nowMs - state.idleStart) / 1000));
+      }
+
+      renderTimersOnly(now);
+
+      try {
+        updateLastSeenUI();
+      } catch (err) {
+        console.error("LastSeen Error:", err);
+      }
+
+      checkMidnightReset(now);
+
+      // Loop timing synchronization
+      setTimeout(tick, 1000 - (nowMs % 1000));
+    }
+
+    /*==========================================================================
+     * 18. APPLICATION SHORTCUT HOTKEYS & AUDIOS
+     * =========================================================================*/
+    window.addEventListener("keydown", (e) => {
+      if (["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName)) return;
+
+      // Spacebar: Toggle Mode
+      if (e.code === "Space") {
+        e.preventDefault();
+        if (state.currentMode === "work") {
+          switchMode("break");
+        } else {
+          switchMode("work");
+        }
+      }
+
+      // S key: Trigger Shift submission modal
+      if (e.key.toLowerCase() === "s") {
+        if (DOM.submitModal.style.display !== "flex") {
+          openSubmitModal();
+        }
+      }
+    });
+
+    /**
+     * Uses browser Web Audio synthesizer to play a neat 880Hz Sine beep wave on goal achievements.
+     */
+    function playGoalSound() {
+      try {
+        const context = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = context.createOscillator();
+        const gain = context.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, context.currentTime);
+        osc.connect(gain);
+        gain.connect(context.destination);
+
+        gain.gain.setValueAtTime(0, context.currentTime);
+        gain.gain.linearRampToValueAtTime(0.2, context.currentTime + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 1);
+
+        osc.start();
+        osc.stop(context.currentTime + 1);
+      } catch (e) {
+        console.error("Audio blocked:", e);
+      }
+    }
+
+    /**
+     * Refreshes user active state notifications on master clocks.
+     */
+    function updateLastSeenUI() {
+      const lastSeenEl = document.getElementById("last-seen");
+      if (!lastSeenEl) return;
+
+      const secondsIdle = Math.floor((getTrueTime() - lastActivity) / 1000);
+
+      if (secondsIdle < 10) {
+        lastSeenEl.textContent = "Active";
+        lastSeenEl.style.color = "var(--accent-work)";
+      } else if (secondsIdle < 60) {
+        lastSeenEl.textContent = "Idle: " + secondsIdle + "s";
+        lastSeenEl.style.color = "var(--text-muted)";
+      } else {
+        const mins = Math.floor(secondsIdle / 60);
+        lastSeenEl.textContent = "Idle: " + mins + "m";
+        lastSeenEl.style.color = "var(--accent-warning)";
+      }
+    }
+
+    /*==========================================================================
+     * 19. MANUAL LOG INSERTION UTILITIES
+     * =========================================================================*/
+    function openManualModal() {
+      document.getElementById("manual-date").value = getPSTDate();
+      document.getElementById("manual-work").value = "00:00:00";
+      document.getElementById("manual-break").value = "00:00:00";
+      document.getElementById("manual-notes").value = "";
+
+      document.getElementById("manual-goal-h").value = DOM.goalHours.value;
+      document.getElementById("manual-goal-m").value = DOM.goalMins.value;
+
+      document.getElementById("manual-modal").style.display = "flex";
+    }
+
+    function closeManualModal() {
+      const modal = document.getElementById("manual-modal");
+      if (modal) {
+        modal.style.display = "none";
+      }
+    }
+
+    /**
+     * Validates and inserts a manual log directly into storage databases.
+     */
+    function saveManualModal() {
+      const dateStr = document.getElementById("manual-date").value.trim();
+      const workStr = document.getElementById("manual-work").value.trim();
+      const breakStr = document.getElementById("manual-break").value.trim();
+      const notes = document.getElementById("manual-notes").value.trim();
+
+      const gh = parseInt(document.getElementById("manual-goal-h").value) || 0;
+      const gm = parseInt(document.getElementById("manual-goal-m").value) || 0;
+      const goal = gh * 3600 + gm * 60;
+
+      const parseTime = (str) => {
+        const p = str.split(":");
+        return p.length === 3 ? parseInt(p[0]) * 3600 + parseInt(p[1]) * 60 + parseInt(p[2]) : null;
+      };
+
+      const wSec = parseTime(workStr);
+      const bSec = parseTime(breakStr);
+
+      if (wSec !== null && bSec !== null && dateStr.match(/^\d{1,2}\/\d{1,2}\/\d{2}$/)) {
+        const diff = wSec - goal;
+        const [m, d, y] = dateStr.split("/");
+        const fullYear = y.length === 2 ? `20${y}` : y;
+        const epochMs = Date.UTC(parseInt(fullYear), parseInt(m) - 1, parseInt(d));
+
+        const entry = {
+          date: dateStr,
+          displayDate: dateStr.replace(/\/20(\d{2})$/, "/$1"),
+          epochMs: epochMs,
+          login: "Manual",
+          logout: "Entry",
+          workSec: wSec,
+          breakSec: bSec,
+          status: diff >= 0 ? "OVER" : "UNDER",
+          diff: formatDuration(Math.abs(diff)),
+          notes: notes,
+          dayGoal: goal,
+        };
+        entry.searchStr = `${entry.displayDate} ${entry.date} manual entry ${notes}`.toLowerCase();
+
+        const logs = getLogs();
+        logs.push(entry);
+        logs.sort((a, b) => b.epochMs - a.epochMs);
+
+        saveLogs(logs);
+        renderLogbook();
+        renderInsights();
+
+        closeManualModal();
+        showAppToast("Manual shift added successfully.");
+      } else {
+        showAppToast("Invalid format. Use MM/DD/YY and HH:MM:SS.");
+      }
+    }
+
+    /*==========================================================================
+     * 20. INITIALIZATION PROCEDURES
+     * =========================================================================*/
+
+    // Modal background clicks closing shortcuts
+    window.onclick = function (event) {
+      if (event.target == DOM.submitModal) closeSubmitModal();
+      if (event.target == DOM.noteModal) closeNoteModal();
+      if (event.target == DOM.ghostModal) closeGhostModal();
+
+      const manualMod = document.getElementById("manual-modal");
+      if (event.target == manualMod) closeManualModal();
+    };
+
+    DOM.startBtn.addEventListener("click", () => switchMode("work"));
+    DOM.pauseBtn.addEventListener("click", () => {
+      if (state.currentMode === "work") {
+        switchMode("break");
+      } else {
+        switchMode("work");
+      }
+    });
+
+    document.getElementById("import-file").addEventListener("change", importJSON);
+
+    // Goal Hour updates
+    DOM.goalHours.value = localStorage.getItem(GOAL_H_KEY) || 8;
+    DOM.goalMins.value = localStorage.getItem(GOAL_M_KEY) || 0;
+
+    const blockInvalidKeys = (e) => {
+      // Allow navigation and edit keys
+      if (
+        e.key === "Backspace" ||
+        e.key === "Delete" ||
+        e.key === "ArrowLeft" ||
+        e.key === "ArrowRight" ||
+        e.key === "Tab" ||
+        e.key === "Escape" ||
+        e.key === "Enter"
+      ) {
+        return;
+      }
+      // Block non-numeric characters (only allow 0-9 digits)
+      if (e.key < "0" || e.key > "9") {
+        e.preventDefault();
+      }
+    };
+
+    const handleGoalHoursBlur = () => {
+      let val = DOM.goalHours.value.trim();
+      if (val === "") {
+        val = "0";
+      } else {
+        val = Math.max(0, parseInt(val, 10) || 0).toString();
+      }
+      DOM.goalHours.value = "";
+      DOM.goalHours.value = val;
+      localStorage.setItem(GOAL_H_KEY, val);
+      renderTimersOnly();
+      renderInsights();
+    };
+
+    const handleGoalMinsBlur = () => {
+      let val = DOM.goalMins.value.trim();
+      if (val === "") {
+        val = "0";
+      } else {
+        const num = parseInt(val, 10) || 0;
+        val = Math.min(59, Math.max(0, num)).toString();
+      }
+      DOM.goalMins.value = "";
+      DOM.goalMins.value = val;
+      localStorage.setItem(GOAL_M_KEY, val);
+      renderTimersOnly();
+      renderInsights();
+    };
+
+    const handleGoalHoursChange = () => {
+      const val = DOM.goalHours.value.trim();
+      if (val !== "") {
+        const num = Math.max(0, parseInt(val, 10) || 0);
+        localStorage.setItem(GOAL_H_KEY, num);
+      }
+      renderTimersOnly();
+      renderInsights();
+    };
+
+    const handleGoalMinsChange = () => {
+      const val = DOM.goalMins.value.trim();
+      if (val !== "") {
+        const num = Math.min(59, Math.max(0, parseInt(val, 10) || 0));
+        localStorage.setItem(GOAL_M_KEY, num);
+      }
+      renderTimersOnly();
+      renderInsights();
+    };
+
+    DOM.goalHours.addEventListener("keydown", blockInvalidKeys);
+    DOM.goalMins.addEventListener("keydown", blockInvalidKeys);
+
+    DOM.goalHours.addEventListener("blur", handleGoalHoursBlur);
+    DOM.goalMins.addEventListener("blur", handleGoalMinsBlur);
+
+    DOM.goalHours.addEventListener("change", handleGoalHoursChange);
+    DOM.goalMins.addEventListener("change", handleGoalMinsChange);
+    DOM.goalHours.addEventListener("input", handleGoalHoursChange);
+    DOM.goalMins.addEventListener("input", handleGoalMinsChange);
+
+    // Timezone preferences
+    DOM.primaryTz.value = localStorage.getItem(TZ_KEY) || "America/Los_Angeles";
+    DOM.primaryTz.addEventListener("change", () => {
+      localStorage.setItem(TZ_KEY, DOM.primaryTz.value);
+      updatePrimaryFormatter();
+      renderTimersOnly();
+    });
+
+    // Alert preventing window tabs closing if timer is actively tracking
+    window.addEventListener("beforeunload", (e) => {
+      if (state.currentMode !== null) {
+        const msg = "Timer is still running! Are you sure you want to leave?";
+        e.returnValue = msg;
+        return msg;
+      }
+    });
+
+    // Native custom application toast notifier
+    function showAppToast(msg) {
+      const toast = document.getElementById("app-toast");
+      toast.textContent = msg;
+      toast.style.bottom = "30px";
+      clearTimeout(appToastTimeout);
+      appToastTimeout = setTimeout(() => {
+        toast.style.bottom = "-100px";
+      }, 3000);
+    }
+
+    // Modal confirmation dialog builder
+    function openConfirmModal(title, desc, callback, isDestructive = true) {
+      document.getElementById("confirm-title").textContent = title;
+      document.getElementById("confirm-desc").textContent = desc;
+      const btn = document.getElementById("confirm-action-btn");
+      if (isDestructive) {
+        document.getElementById("confirm-title").style.color = "var(--accent-break)";
+        btn.style.color = "var(--accent-break)";
+        btn.style.background = "rgba(248, 113, 113, 0.1)";
+        btn.style.borderColor = "rgba(248, 113, 113, 0.3)";
+        btn.textContent = "Delete";
+      } else {
+        document.getElementById("confirm-title").style.color = "var(--accent-warning)";
+        btn.style.color = "var(--accent-warning)";
+        btn.style.background = "rgba(245, 158, 11, 0.1)";
+        btn.style.borderColor = "rgba(245, 158, 11, 0.3)";
+        btn.textContent = "Confirm";
+      }
+      confirmCallback = callback;
+      document.getElementById("confirm-modal").style.display = "flex";
+    }
+
+    function closeConfirmModal() {
+      document.getElementById("confirm-modal").style.display = "none";
+      confirmCallback = null;
+    }
+
+    document.getElementById("confirm-action-btn").addEventListener("click", () => {
+      if (confirmCallback) confirmCallback();
+      closeConfirmModal();
+    });
+
+    // Escape character entities utility
+    function escapeHTML(str) {
+      if (!str) return "";
+      return str.replace(
+        /[&<>'"]/g,
+        (tag) =>
+          ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[tag] || tag
+      );
+    }
+
+    // High performance UI execution debouncer
+    function debounce(func, wait) {
+      let timeout;
+      return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+      };
+    }
+
+    // Swaps between navigation tabs
+    function switchTab(target) {
+      document.querySelectorAll(".tab-content").forEach((el) => {
+        el.style.display = "none";
+      });
+      document.querySelectorAll(".tab-btn").forEach((btn) => btn.classList.remove("active"));
+      const targetContent = document.getElementById("tab-" + target);
+      if (target === "insights") {
+        targetContent.style.display = "flex";
+        targetContent.style.flexDirection = "column";
+      } else {
+        targetContent.style.display = "block";
+      }
+      document.querySelector(`.tab-btn[data-target="${target}"]`).classList.add("active");
+    }
+
+    // Insights week shifts navigation selector
+    function changeWeekOffset(delta) {
+      displayBaseDate.setDate(displayBaseDate.getDate() + delta * 7);
+      renderInsights();
+    }
+
+    // Toggles advanced filter viewports
+    function toggleFilters() {
+      const panel = document.getElementById("advanced-filters");
+      const btn = document.getElementById("filter-toggle-btn");
+      if (panel.classList.contains("show")) {
+        panel.classList.remove("show");
+        btn.classList.remove("active");
+      } else {
+        panel.classList.add("show");
+        btn.classList.add("active");
+      }
+    }
+
+    // Resets goal time selectors
+    function getGoalSeconds() {
+      const h = Math.max(0, parseFloat(DOM.goalHours.value) || 0);
+      const m = Math.max(0, parseFloat(DOM.goalMins.value) || 0);
+      const total = h * 3600 + m * 60;
+      return total > 0 ? total : 1;
+    }
+
+    // Formats numbers representing seconds into HH:MM:SS format strings
+    function formatDuration(sec) {
+      sec = Math.max(0, Math.floor(sec));
+      const h = Math.floor(sec / 3600)
+        .toString()
+        .padStart(2, "0");
+      const m = Math.floor((sec % 3600) / 60)
+        .toString()
+        .padStart(2, "0");
+      const s = Math.floor(sec % 60)
+        .toString()
+        .padStart(2, "0");
+      return `${h}:${m}:${s}`;
+    }
+
+    // Formats numbers representing seconds into clean, highly readable short text (e.g. 8h 30m, 45m, or dimmed em-dash placeholder for zero)
+    function formatFriendlyDuration(sec, emptyPlaceholder = '<span style="opacity: 0.25; font-weight: 400;">—</span>') {
+      if (sec === undefined || sec === null || sec <= 0) return emptyPlaceholder;
+      sec = Math.floor(sec);
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      
+      if (h > 0 && m > 0) {
+        return `${h}h ${m}m`;
+      } else if (h > 0) {
+        return `${h}h`;
+      } else if (m > 0) {
+        return `${m}m`;
+      } else {
+        return s > 0 ? `${s}s` : emptyPlaceholder;
+      }
+    }
+
+    // Persists tracking status configuration variables inside browser cache databases
+    function saveState() {
+      localStorage.setItem(STATE_KEY, JSON.stringify(state));
+    }
+
+    // Decodes persisted session attributes on startup
+    function loadState() {
+      const saved = localStorage.getItem(STATE_KEY);
+      if (saved) {
+        state = JSON.parse(saved);
+        if (state.lastActivity) lastActivity = state.lastActivity;
+        const currentDate = getPSTDate();
+
+        // Submit pending work if calendar dates changed mid-session
+        if (state.activeDate && state.activeDate !== currentDate) {
+          if (state.workAccumulated > 60) {
+            executeSubmit(null, "Auto-submitted (Page Load)", state.activeDate);
+          } else {
+            resetSession();
+          }
+        }
+      }
+    }
+
+    /**
+     * Launches first execution bootstrap cycle.
+     */
+    (async function initApp() {
+      fetchTrueTime().then(() => {
+        if (state.currentMode) renderTimersOnly();
+      });
+
+      cachedLogs = await loadLogsFromDB();
+
+      rebuildWeeklyCache();
+      updatePrimaryFormatter();
+      displayBaseDate = getPSTDateObj();
+      loadState();
+      renderStaticUI();
+      renderTimersOnly();
+      renderLogbook();
+      renderInsights();
+      renderThemeToggle();
+      tick();
+
+      // Set up secondary background save task routines (every 5 seconds)
+      setInterval(commitCrashRecoveryTime, 5000);
+    })();
+  </script>
+</body>
+
+</html>
