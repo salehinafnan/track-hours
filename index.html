@@ -3462,7 +3462,7 @@
         const isFiltering = timeFilter || statusFilter || notesFilter || dateStart || dateEnd || hoursFilter;
 
         if (isFiltering) {
-          countDisplay.textContent = `Showing ${filteredCount.toLocaleString()} of ${totalLogsCount.toLocaleString()} shift${totalLogsCount !== 1 ? "s" : ""}`;
+          countDisplay.textContent = `Showing ${filteredCount.toLocaleString()} of ${totalLogsCount.toLocaleString()} Shift${totalLogsCount !== 1 ? "s" : ""}`;
         } else {
           countDisplay.textContent = `${totalLogsCount.toLocaleString()} shift${totalLogsCount !== 1 ? "s" : ""}`;
         }
