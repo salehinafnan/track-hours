@@ -3425,11 +3425,18 @@
         );
       }
 
+      /**
+       * Calculates the total work seconds logged in the database for today's date.
+       * Aggregates history logs to support cumulative daily target evaluation across split shifts.
+       *
+       * @returns {number} The cumulative sum of today's archived shift durations in seconds.
+       */
       function getTodayLoggedWorkSeconds() {
         const todayStr = getPSTDate();
         const logs = getLogs();
         let total = 0;
         for (let i = 0; i < logs.length; i++) {
+          // Match shifts logged either with standard date or display formatting
           if (logs[i].displayDate === todayStr || logs[i].date === todayStr) {
             total += logs[i].workSec;
           }
@@ -3660,9 +3667,11 @@
       }
 
       /**
-       * Adjusts active progress bar scales, percentages, remaining times, and goal reachings.
+       * Adjusts active progress indicators, text ratios, and daily goal targets.
+       * Decouples the main visual progress bar (live tracking duration only) from the
+       * weekly weekday segments (cumulative tracking duration including logged shifts).
        *
-       * @param {number} workSeconds - Live worked seconds for the active date.
+       * @param {number} workSeconds - Live worked seconds for the active tracking session.
        */
       function updateProgress(workSeconds) {
         const goalSec = getGoalSeconds();
@@ -3670,19 +3679,19 @@
         const cumulativeWorkSeconds = loggedSec + workSeconds;
         const diff = cumulativeWorkSeconds - goalSec;
 
-        // Live timer progress (independent of logged shifts)
+        // 1. Live session progress (drives the main horizontal progress fill scale)
         const livePercent = goalSec > 0 ? Math.min((workSeconds / goalSec) * 100, 100) : 100;
         const liveScaleValue = livePercent / 100;
 
-        // Cumulative day progress (sum of logged + live timer)
+        // 2. Cumulative daily progress (drives today's weekly calendar segment fill scale)
         const cumulativePercent = goalSec > 0 ? Math.min((cumulativeWorkSeconds / goalSec) * 100, 100) : 100;
         const cumulativeScaleValue = cumulativePercent / 100;
 
-        // Update Main UI Progress Rail (Live Session Only)
+        // 3. Update main visual progress bar representation (live tracking segment only)
         setStyle(DOM.progressFill, "transform", `scaleX(${liveScaleValue})`);
 
         if (livePercent >= 100) {
-          // Laser Green Bloom
+          // Green glow styling for live goal completion
           setStyle(DOM.progressFill, "background", "var(--accent-work)");
           setStyle(
             DOM.progressFill,
@@ -3690,7 +3699,7 @@
             "0 0 12px var(--accent-work), 0 0 35px color-mix(in srgb, var(--accent-work) 50%, transparent)",
           );
         } else {
-          // Laser Blue Bloom
+          // Standard blue tracking styling
           setStyle(DOM.progressFill, "background", "var(--accent-blue)");
           setStyle(
             DOM.progressFill,
@@ -3699,12 +3708,11 @@
           );
         }
 
-        // LIVE UPDATE: Small Weekly Progress Boxes (Cumulative Progress)
+        // 4. Update the current weekday segmented progress indicator (fully cumulative)
         const nowPST = getPSTDateObj();
         const dayIdx = nowPST.getDay(); // 0 (Sun) to 6 (Sat)
         const isoDay = dayIdx === 0 ? 7 : dayIdx; // 1 (Mon) to 7 (Sun)
 
-        // Only update the segment if today is a weekday (Mon-Fri)
         if (isoDay <= 5) {
           const todaySegmentFill = DOM.progressSegmentFills[isoDay - 1];
           if (todaySegmentFill) {
@@ -3718,7 +3726,7 @@
           }
         }
 
-        // Toggle celebratory ambient glow class on progress rail (based on cumulative progress)
+        // 5. Manage ambient pulsing glow of the progress rail (triggered on overall daily target completion)
         if (DOM.progressRail) {
           if (cumulativeWorkSeconds >= goalSec && goalSec > 0) {
             DOM.progressRail.classList.add("goal-completed");
@@ -3727,6 +3735,7 @@
           }
         }
 
+        // 6. Handle theme-specific glass-morphism overrides for Midnight noir
         const isSpecial = currentTheme === "midnight";
         if (isSpecial) {
           const shadowVal =
@@ -3738,13 +3747,14 @@
           setStyle(DOM.progressFill, "boxShadow", "none");
         }
 
+        // 7. Update visual text ratios presenting live percent alongside daily remaining time
         const progressStr =
           diff >= 0
             ? `${livePercent.toFixed(1)}% (Overtime: ${formatFriendlyDuration(diff, "0m")})`
             : `${livePercent.toFixed(1)}% (Left: ${formatFriendlyDuration(Math.abs(diff), "0m")})`;
         setText(DOM.progressText, progressStr);
 
-        // Force Estimated End of Day prediction to Asia/Dhaka time zone
+        // 8. Recalculate local estimated end of day finish timestamp
         const etaEl = document.getElementById("eta-text");
         if (diff >= 0) {
           setText(etaEl, "Goal Reached");
@@ -3757,7 +3767,7 @@
           etaEl.style.color = "var(--text-muted)";
         }
 
-        // Celebratory alert when daily production hours hit target boundary
+        // 9. Dispatch congratulations alert modal when target production metrics are satisfied
         if (cumulativeWorkSeconds >= goalSec && !state.goalNotified && state.currentMode === "work") {
           document.getElementById("goal-modal").style.display = "flex";
           playGoalSound();
