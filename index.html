@@ -3669,13 +3669,19 @@
         const loggedSec = getTodayLoggedWorkSeconds();
         const cumulativeWorkSeconds = loggedSec + workSeconds;
         const diff = cumulativeWorkSeconds - goalSec;
-        const percent = goalSec > 0 ? Math.min((cumulativeWorkSeconds / goalSec) * 100, 100) : 100;
-        const scaleValue = percent / 100;
 
-        // Update Main UI Progress Rail
-        setStyle(DOM.progressFill, "transform", `scaleX(${scaleValue})`);
+        // Live timer progress (independent of logged shifts)
+        const livePercent = goalSec > 0 ? Math.min((workSeconds / goalSec) * 100, 100) : 100;
+        const liveScaleValue = livePercent / 100;
 
-        if (percent >= 100) {
+        // Cumulative day progress (sum of logged + live timer)
+        const cumulativePercent = goalSec > 0 ? Math.min((cumulativeWorkSeconds / goalSec) * 100, 100) : 100;
+        const cumulativeScaleValue = cumulativePercent / 100;
+
+        // Update Main UI Progress Rail (Live Session Only)
+        setStyle(DOM.progressFill, "transform", `scaleX(${liveScaleValue})`);
+
+        if (livePercent >= 100) {
           // Laser Green Bloom
           setStyle(DOM.progressFill, "background", "var(--accent-work)");
           setStyle(
@@ -3693,7 +3699,7 @@
           );
         }
 
-        // LIVE UPDATE: Small Weekly Progress Boxes
+        // LIVE UPDATE: Small Weekly Progress Boxes (Cumulative Progress)
         const nowPST = getPSTDateObj();
         const dayIdx = nowPST.getDay(); // 0 (Sun) to 6 (Sat)
         const isoDay = dayIdx === 0 ? 7 : dayIdx; // 1 (Mon) to 7 (Sun)
@@ -3702,8 +3708,8 @@
         if (isoDay <= 5) {
           const todaySegmentFill = DOM.progressSegmentFills[isoDay - 1];
           if (todaySegmentFill) {
-            todaySegmentFill.style.transform = `scaleX(${scaleValue})`;
-            if (percent >= 100) {
+            todaySegmentFill.style.transform = `scaleX(${cumulativeScaleValue})`;
+            if (cumulativePercent >= 100) {
               todaySegmentFill.style.background = "var(--accent-work)";
             } else {
               todaySegmentFill.style.background =
@@ -3712,7 +3718,7 @@
           }
         }
 
-        // Toggle celebratory ambient glow class on progress rail
+        // Toggle celebratory ambient glow class on progress rail (based on cumulative progress)
         if (DOM.progressRail) {
           if (cumulativeWorkSeconds >= goalSec && goalSec > 0) {
             DOM.progressRail.classList.add("goal-completed");
@@ -3724,7 +3730,7 @@
         const isSpecial = currentTheme === "midnight";
         if (isSpecial) {
           const shadowVal =
-            percent >= 100
+            livePercent >= 100
               ? "0 0 10px color-mix(in srgb, var(--accent-work) 40%, transparent)"
               : "0 0 10px color-mix(in srgb, var(--accent-blue) 40%, transparent)";
           setStyle(DOM.progressFill, "boxShadow", shadowVal);
@@ -3734,8 +3740,8 @@
 
         const progressStr =
           diff >= 0
-            ? `${percent.toFixed(1)}% (Overtime: ${formatFriendlyDuration(diff, "0m")})`
-            : `${percent.toFixed(1)}% (Left: ${formatFriendlyDuration(Math.abs(diff), "0m")})`;
+            ? `${livePercent.toFixed(1)}% (Overtime: ${formatFriendlyDuration(diff, "0m")})`
+            : `${livePercent.toFixed(1)}% (Left: ${formatFriendlyDuration(Math.abs(diff), "0m")})`;
         setText(DOM.progressText, progressStr);
 
         // Force Estimated End of Day prediction to Asia/Dhaka time zone

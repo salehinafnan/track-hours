@@ -72,10 +72,11 @@ The tracker integrates an active workload evaluator to keep you on schedule:
 * **Custom Goal Input**: Adjust your daily work goal directly at the header using the **Goal** text input field. Digits automatically normalize to hours and minutes on focus exit (e.g., `8` $\rightarrow$ `8h 0m`, `830` $\rightarrow$ `8h 30m`). Letters are intercepted in real-time.
 * **Step Adjustments**: Fine-tune your target hours incrementally using the **-15m** and **+15m** adjustment controls.
 * **Customizable Presets**: Click preset buttons (`4h`, `6h`, `8h`) to select them. **Double-click** any preset button to customize its hours to your preference. Presets are saved persistently in LocalStorage and highlight dynamically when active.
+* **Decoupled Main Progress Bar**: The long horizontal progress bar directly under the large production clock measures **only the current active session's progress** relative to your daily target. It is independent of previous shifts, resetting to `0%` whenever a timer is paused or reset, so you can track the exact progress of your current active sprint in isolation.
 
 ### Weekly 40-Hour Engine & Pace Tracker
 * The tracker monitors a fixed **40-hour work week goal** from Monday through Friday.
-* **Weekly Segment Bars**: The UI renders five progress segments representing Monday to Friday. The current day is highlighted, and segments fill up dynamically based on your daily goal achievement.
+* **Weekly Segment Bars (Cumulative)**: The UI renders five progress segments representing Monday to Friday. Today's segment fills **cumulatively** by summing all of today's completed shifts logged in the database with the currently running live session. This ensures that today's segment remains persistently filled (e.g. at 25% or 100% completed) once a shift is submitted, even as the active session timer resets to 0.
 * **Dynamic Daily Pace Indicator**: If you are behind on your weekly 40-hour goal, the pace engine dynamically calculates the required daily workload:
   * *Example display:* `Pace Needed: 5h 30m / day (to hit 40h)`
   * Once the 40-hour goal is reached, the status text turns green and displays your total overtime.
