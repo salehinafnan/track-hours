@@ -6038,7 +6038,7 @@
         return null;
       }
 
-      // Formats numbers representing seconds into clean, highly readable short text (e.g. 8h 30m, 45m, or dimmed em-dash placeholder for zero)
+      // Formats numbers representing seconds into clean, highly readable short text (e.g. 8h 30m, 45m 30s, or dimmed em-dash placeholder for zero)
       function formatFriendlyDuration(
         sec,
         emptyPlaceholder = '<span style="opacity: 0.25; font-weight: 400;">—</span>',
@@ -6049,14 +6049,14 @@
         const m = Math.floor((sec % 3600) / 60);
         const s = sec % 60;
 
-        if (h > 0 && m > 0) {
-          return `${h}h ${m}m`;
-        } else if (h > 0) {
-          return `${h}h`;
-        } else if (m > 0) {
-          return `${m}m`;
+        if (h > 0) {
+          return m > 0 ? `${h}h ${m}m` : `${h}h`;
         } else {
-          return s > 0 ? `${s}s` : emptyPlaceholder;
+          if (m > 0) {
+            return s > 0 ? `${m}m ${s}s` : `${m}m`;
+          } else {
+            return s > 0 ? `${s}s` : emptyPlaceholder;
+          }
         }
       }
 
