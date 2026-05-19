@@ -3427,6 +3427,18 @@
         );
       }
 
+      function getTodayLoggedWorkSeconds() {
+        const todayStr = getPSTDate();
+        const logs = getLogs();
+        let total = 0;
+        for (let i = 0; i < logs.length; i++) {
+          if (logs[i].displayDate === todayStr || logs[i].date === todayStr) {
+            total += logs[i].workSec;
+          }
+        }
+        return total;
+      }
+
       // Inactivity tracker helper
       function updateActivity() {
         if (!state.idleLock && !activityThrottle) {
@@ -3673,8 +3685,10 @@
        */
       function updateProgress(workSeconds) {
         const goalSec = getGoalSeconds();
-        const diff = workSeconds - goalSec;
-        const percent = goalSec > 0 ? Math.min((workSeconds / goalSec) * 100, 100) : 100;
+        const loggedSec = getTodayLoggedWorkSeconds();
+        const cumulativeWorkSeconds = loggedSec + workSeconds;
+        const diff = cumulativeWorkSeconds - goalSec;
+        const percent = goalSec > 0 ? Math.min((cumulativeWorkSeconds / goalSec) * 100, 100) : 100;
         const scaleValue = percent / 100;
 
         // Update Main UI Progress Rail
@@ -3719,7 +3733,7 @@
 
         // Toggle celebratory ambient glow class on progress rail
         if (DOM.progressRail) {
-          if (workSeconds >= goalSec && goalSec > 0) {
+          if (cumulativeWorkSeconds >= goalSec && goalSec > 0) {
             DOM.progressRail.classList.add("goal-completed");
           } else {
             DOM.progressRail.classList.remove("goal-completed");
@@ -3757,7 +3771,7 @@
         }
 
         // Celebratory alert when daily production hours hit target boundary
-        if (workSeconds >= goalSec && !state.goalNotified && state.currentMode === "work") {
+        if (cumulativeWorkSeconds >= goalSec && !state.goalNotified && state.currentMode === "work") {
           document.getElementById("goal-modal").style.display = "flex";
           playGoalSound();
           state.goalNotified = true;
@@ -4751,9 +4765,12 @@
           const dateStr = `${String(dayDate.getUTCMonth() + 1).padStart(2, "0")}/${String(
             dayDate.getUTCDate(),
           ).padStart(2, "0")}/${dayDate.getUTCFullYear().toString().slice(-2)}`;
-          const dayWorkSeconds = logsByDate[dateStr] ? logsByDate[dateStr].w : 0;
+          let dayWorkSeconds = logsByDate[dateStr] ? logsByDate[dateStr].w : 0;
 
           const isToday = dateStr === todayStr;
+          if (isToday) {
+            dayWorkSeconds += getCurrentWorkSeconds(getTrueTime());
+          }
           const savedGoal = logsByDate[dateStr] ? logsByDate[dateStr].goal : 0;
           const denominator = isToday ? dailyGoalSec : savedGoal || 28800;
 
