@@ -46,7 +46,10 @@ Maximize operational speed by utilizing global hotkeys. Keyboard control is disa
 | :--- | :--- | :--- |
 | `Spacebar` | **Toggle Timer Mode** | Instantly switches active state between **Work** and **Break** modes. |
 | `S` | **Open Log Shift Modal** | Opens the shift submission window to archive your current tracking session. |
-| `Escape` | **Close Modals** | Instantly exits any open modal (Edit, Manual Entry, Note, or Submission). |
+| `Escape` | **Clear Selection / Close Modals** | Instantly clears highlighted row selection, or exits any open modal window. |
+| `ArrowUp` / `ArrowDown` | **Logbook Row Selection** | Navigates through the visual logbook list, highlighting the selected row. |
+| `Enter` | **Open Highlighted Note** | Opens the detailed notes modal for the highlighted logbook entry. |
+| `Delete` | **Delete Highlighted Entry** | Opens the deletion confirmation dialog for the highlighted entry. |
 
 ---
 
@@ -66,8 +69,9 @@ To ensure your local database remains perfect and uncorrupted, the app features 
 The tracker integrates an active workload evaluator to keep you on schedule:
 
 ### Daily Work Target
-* Adjust your daily work goal directly at the header using the **Goal** hours and minutes input boxes.
-* Input fields are sanitized: they reject letters, and minutes automatically clamp within a strict `0–59` range when you click away.
+* **Custom Goal Input**: Adjust your daily work goal directly at the header using the **Goal** text input field. Digits automatically normalize to hours and minutes on focus exit (e.g., `8` $\rightarrow$ `8h 0m`, `830` $\rightarrow$ `8h 30m`). Letters are intercepted in real-time.
+* **Step Adjustments**: Fine-tune your target hours incrementally using the **-15m** and **+15m** adjustment controls.
+* **Customizable Presets**: Click preset buttons (`4h`, `6h`, `8h`) to select them. **Double-click** any preset button to customize its hours to your preference. Presets are saved persistently in LocalStorage and highlight dynamically when active.
 
 ### Weekly 40-Hour Engine & Pace Tracker
 * The tracker monitors a fixed **40-hour work week goal** from Monday through Friday.

@@ -166,8 +166,6 @@
       .breakdown-row span,
       .log-top-left span,
       #progress-text,
-      #avg-weekly-work,
-      #avg-weekly-break,
       .tz-select {
         font-family: "JetBrains Mono", monospace;
       }
@@ -400,35 +398,23 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
-        margin: 2.5rem 0;
-      }
-
-      .timer-val {
-        font-size: clamp(3.5rem, 10vw, 6rem);
-        line-height: 0.85;
-        font-weight: 700;
-        letter-spacing: -0.05em;
-        margin-bottom: 0.6rem;
-        transition:
-          color 0.3s ease,
-          text-shadow 0.3s ease;
-        font-variant-numeric: tabular-nums;
+        margin: 1rem 0;
       }
 
       #break-timer {
         font-size: clamp(2.2rem, 6vw, 4rem);
         margin-bottom: 1rem;
-        letter-spacing: -0.03em;
-        opacity: 0.9;
       }
 
       .progress-rail {
-        height: 6px;
-        background: var(--element-bg);
-        border-radius: 999px;
-        overflow: hidden;
-        margin: 15px 0;
-        border: 1px solid rgba(255, 255, 255, 0.02);
+        height: 4px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 2px;
+        overflow: visible;
+        /* Increased top margin to 50px to create independence from Production section */
+        margin: 50px 0 10px 0;
+        border: none;
+        position: relative;
       }
 
       #progress-fill {
@@ -437,11 +423,30 @@
         transform: scaleX(0);
         transform-origin: left;
         background: var(--accent-blue);
-        box-shadow: 0 0 10px color-mix(in srgb, var(--accent-blue) 40%, transparent);
-        transition:
-          transform 0.5s ease,
-          background 0.3s ease,
-          box-shadow 0.3s ease;
+        border-radius: 2px;
+        /* The "Laser Bloom" - Layer 1 is sharp, Layer 2 is a wide atmospheric glow */
+        box-shadow:
+          0 0 10px var(--accent-blue),
+          0 0 30px color-mix(in srgb, var(--accent-blue) 40%, transparent);
+        /* Smooth, cinematic expansion */
+        transition: transform 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+        position: relative;
+        will-change: transform;
+      }
+
+      /* Adding a tiny "head" to the laser for a sense of direction */
+      #progress-fill::after {
+        content: "";
+        position: absolute;
+        right: -2px;
+        top: -2px;
+        width: 8px;
+        height: 8px;
+        background: #fff;
+        border-radius: 50%;
+        filter: blur(2px);
+        box-shadow: 0 0 15px #fff;
+        opacity: 0.8;
       }
 
       /* Ambient Pulsing Glow for Goal Completion */
@@ -449,9 +454,11 @@
         0% {
           box-shadow: 0 0 8px rgba(74, 222, 128, 0.25);
         }
+
         50% {
           box-shadow: 0 0 20px rgba(74, 222, 128, 0.5);
         }
+
         100% {
           box-shadow: 0 0 8px rgba(74, 222, 128, 0.25);
         }
@@ -501,56 +508,60 @@
         align-items: center;
       }
 
+      /* Enhanced Preset Container */
       .goal-presets {
         position: absolute;
-        top: 100%;
+        top: 110%;
+        /* Slightly further down */
         right: 0;
         opacity: 0;
         pointer-events: none;
         display: flex;
-        gap: 5px;
-        padding-top: 12px;
-        margin-top: -6px;
-        transition:
-          opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-          transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 99;
-        transform: scale(0.95);
-        transform-origin: top right;
+        gap: 6px;
+        padding: 8px;
+        background: rgba(15, 15, 15, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--border-main);
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        transform: translateY(-10px) scale(0.95);
+        z-index: 100;
       }
 
-      .goal-container:hover .goal-presets,
-      .goal-inputs:focus-within + .goal-presets,
-      .goal-presets:hover {
+      .goal-container:hover .goal-presets {
         opacity: 1;
         pointer-events: auto;
-        transform: scale(1);
+        transform: translateY(0) scale(1);
       }
 
+      /* Preset Pills with Active State */
       .preset-pill {
-        background: rgba(15, 15, 15, 0.9);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+        background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        color: var(--text-main);
-        font-size: 0.72rem;
+        color: var(--text-muted);
+        font-size: 0.75rem;
         font-weight: 700;
-        padding: 4px 10px;
-        border-radius: 99px;
+        padding: 6px 12px;
+        border-radius: 8px;
         cursor: pointer;
-        transition:
-          background 0.2s,
-          border-color 0.2s,
-          color 0.2s,
-          transform 0.1s;
-        font-family: "JetBrains Mono", monospace;
+        transition: all 0.2s ease;
+        white-space: nowrap;
       }
 
       .preset-pill:hover {
-        background: rgba(74, 222, 128, 0.15);
-        border-color: rgba(74, 222, 128, 0.4);
-        color: var(--accent-work);
-        transform: scale(1.05);
+        background: var(--element-hover);
+        color: var(--text-main);
+        border-color: var(--accent-blue);
+      }
+
+      /* The "Active" state for the currently selected goal */
+      .preset-pill.active {
+        background: rgba(96, 165, 250, 0.15);
+        border-color: var(--accent-blue);
+        color: var(--accent-blue);
+        box-shadow: 0 0 10px rgba(96, 165, 250, 0.2);
       }
 
       /* =========================================================================
@@ -862,6 +873,7 @@
           opacity: 0;
           transform: scale(0.9);
         }
+
         to {
           opacity: 1;
           transform: scale(1);
@@ -890,6 +902,12 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
+      }
+
+      .log-row.kb-selected {
+        border-color: var(--accent-blue);
+        background: rgba(96, 165, 250, 0.06);
+        outline: none;
       }
 
       #log-container {
@@ -1006,45 +1024,99 @@
       }
 
       /* =========================================================================
-       11. SIDEBAR FOOTER & DATA MANAGEMENT
+       11. SIDEBAR FOOTER - UNIFIED SYSTEM BAR
        ========================================================================= */
       .sidebar-footer {
-        margin-top: 15px;
-        padding-top: 15px;
+        margin-top: auto;
+        padding-top: 0.5rem;
         border-top: 1px solid var(--border-main);
         display: flex;
         justify-content: space-between;
         align-items: center;
+        /* Centers metadata and icons vertically in one row */
+        margin-right: 0px;
         flex-shrink: 0;
-        margin-right: 10px;
+        min-height: 60px;
       }
 
-      .footer-text {
-        font-size: 0.65rem;
+      /* Left Side: Two-line Micro Metadata */
+      .footer-metadata {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 4px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.6rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        line-height: 1;
+      }
+
+      .footer-metadata .label {
+        color: var(--accent-blue);
+        font-weight: 700;
+        opacity: 0.8;
+      }
+
+      .footer-metadata .value {
         color: var(--text-muted);
-        line-height: 1.4;
+        font-weight: 400;
+        opacity: 0.7;
       }
 
-      .footer-text strong {
-        color: var(--text-main);
-        font-weight: 600;
-      }
-
+      /* Right Side: Icon Grid */
       .footer-icons {
         display: flex;
-        gap: 6px;
+        align-items: center;
+        gap: 15px;
       }
 
-      .sq-btn {
-        width: 38px;
-        height: 38px;
-        padding: 0;
+      .icon-stack {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+
+      /* Labels at the bottom of icons */
+      .icon-tag {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.45rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        opacity: 0.7;
+        letter-spacing: 0.02em;
+      }
+
+      .sidebar-footer .sq-btn {
+        width: 45px;
+        height: 45px;
+        background: var(--element-bg);
+        border: 1px solid var(--border-main);
         border-radius: 10px;
+        transition: all 0.2s ease;
       }
 
-      .sq-btn svg {
-        width: 18px;
-        height: 18px;
+      .sidebar-footer .sq-btn:hover {
+        background: var(--element-hover);
+        border-color: var(--border-light);
+        color: var(--text-main);
+        transform: translateY(-1px);
+      }
+
+      .sidebar-footer .sq-btn svg {
+        width: 23px;
+        height: 23px;
+      }
+
+      /* Separator between standard actions and danger zone */
+      .footer-divider {
+        width: 1px;
+        height: 34px;
+        background: var(--border-main);
+        margin: 0 4px;
+        align-self: center;
       }
 
       /* =========================================================================
@@ -1288,6 +1360,58 @@
           gap: 15px;
           align-items: flex-start;
         }
+      }
+
+      /* Ticker Animation Styles */
+      .timer-val {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 0.1rem;
+        font-size: clamp(3.5rem, 10vw, 6rem);
+        line-height: 1;
+        font-weight: 700;
+        letter-spacing: -0.05em;
+        margin-bottom: 0;
+        transition:
+          color 0.3s ease,
+          text-shadow 0.3s ease;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .digit-slot {
+        position: relative;
+        height: 1em;
+        width: 0.62em;
+        /* Fixed width prevents the timer from "jumping" left/right */
+        overflow: hidden;
+        display: inline-flex;
+        justify-content: center;
+      }
+
+      .digit-strip {
+        position: absolute;
+        top: 0;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        will-change: transform;
+      }
+
+      .digit-strip span {
+        height: 1em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .timer-separator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 0.2em;
+        opacity: 0.4;
+        margin-top: -0.1em;
       }
     </style>
   </head>
@@ -1997,6 +2121,83 @@
     <!-- Unified Dynamic Floating Tooltip -->
     <div id="app-tooltip" class="app-tooltip"></div>
 
+    <!-- Edit Preset Goal Modal -->
+    <div id="preset-modal" class="modal-overlay" style="z-index: 3500">
+      <div class="modal-container" style="max-width: 320px">
+        <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.1rem; color: var(--text-main)">
+          Edit Preset
+        </h3>
+        <div style="text-align: left">
+          <label
+            style="
+              display: block;
+              font-size: 0.75rem;
+              color: var(--text-muted);
+              margin-bottom: 6px;
+              font-weight: 600;
+            "
+          >
+            Target Hours (e.g. 7.5)
+          </label>
+          <input
+            type="number"
+            id="preset-input"
+            step="0.5"
+            min="0"
+            max="24"
+            onfocus="this.select()"
+            style="
+              width: 100%;
+              margin-bottom: 20px;
+              box-sizing: border-box;
+              background: var(--panel-bg);
+              border: 1px solid var(--border-main);
+              color: var(--text-main);
+              padding: 12px;
+              border-radius: 8px;
+              font-family: inherit;
+              font-size: 1rem;
+              outline: none;
+            "
+          />
+        </div>
+        <div style="display: flex; gap: 10px">
+          <button
+            class="btn-secondary"
+            style="
+              flex: 1;
+              padding: 12px;
+              background: transparent;
+              border: 1px solid var(--border-light);
+              color: var(--text-main);
+              border-radius: 12px;
+              cursor: pointer;
+              font-weight: 600;
+            "
+            onclick="closePresetModal()"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn-log"
+            style="
+              flex: 1;
+              padding: 12px;
+              background: rgba(96, 165, 250, 0.1);
+              color: var(--accent-blue);
+              border: 1px solid rgba(96, 165, 250, 0.3);
+              border-radius: 12px;
+              font-weight: 600;
+              cursor: pointer;
+            "
+            onclick="savePresetModal()"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Daily Goal Reached celebratory modal -->
     <div id="goal-modal" class="modal-overlay">
       <div class="modal-container" style="text-align: center; border: 2px solid var(--accent-work)">
@@ -2058,9 +2259,41 @@
                 <input type="hidden" id="goal-mins" value="0" />
               </div>
               <div class="goal-presets">
-                <button class="preset-pill" onclick="setGoalPreset(4)">4h</button>
-                <button class="preset-pill" onclick="setGoalPreset(6)">6h</button>
-                <button class="preset-pill" onclick="setGoalPreset(8)">8h</button>
+                <!-- Adjustment Button -->
+                <button class="preset-pill" onclick="adjustGoal(-15)" title="Remove 15 mins">
+                  -15m
+                </button>
+
+                <!-- Customizable Middle Buttons -->
+                <button
+                  class="preset-pill dynamic-preset"
+                  id="preset-0"
+                  ondblclick="changePreset(0)"
+                  title="Double-click to edit preset"
+                >
+                  4h
+                </button>
+                <button
+                  class="preset-pill dynamic-preset"
+                  id="preset-1"
+                  ondblclick="changePreset(1)"
+                  title="Double-click to edit preset"
+                >
+                  6h
+                </button>
+                <button
+                  class="preset-pill dynamic-preset"
+                  id="preset-2"
+                  ondblclick="changePreset(2)"
+                  title="Double-click to edit preset"
+                >
+                  8h
+                </button>
+
+                <!-- Adjustment Button -->
+                <button class="preset-pill" onclick="adjustGoal(15)" title="Add 15 mins">
+                  +15m
+                </button>
               </div>
             </div>
             <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">
@@ -2072,7 +2305,7 @@
         <!-- Live Counters Visualization Section -->
         <div class="timers-wrapper">
           <div class="label-xs">Production Time</div>
-          <div id="work-timer" class="timer-val">00:00:00</div>
+          <div id="work-timer" class="timer-val"></div>
 
           <!-- Linear Progress Rail -->
           <div class="progress-rail">
@@ -2084,8 +2317,10 @@
               justify-content: space-between;
               font-size: 0.75rem;
               color: var(--text-muted);
-              margin-top: -10px;
-              margin-bottom: 20px;
+              margin-top: 0px;
+              /* Matches the 50px top margin to make the progress unit centered */
+              margin-bottom: 50px;
+              font-family: &quot;JetBrains Mono&quot;, monospace;
             "
           >
             <span id="progress-text" style="font-family: &quot;JetBrains Mono&quot;, monospace"
@@ -2097,7 +2332,7 @@
           </div>
 
           <div class="label-xs">Break Time</div>
-          <div id="break-timer" class="timer-val">00:00:00</div>
+          <div id="break-timer" class="timer-val"></div>
         </div>
 
         <!-- Dynamic Active Session Controllers -->
@@ -2606,59 +2841,82 @@
 
         <!-- Data Export / Restore / Wipe Panel -->
         <div class="sidebar-footer">
-          <div class="footer-text">
-            <strong>Data Management -&gt;</strong><br />
-            Changes auto-saved in browser<br />
-            All logs in PST time and date format
+          <!-- Left Bottom: Two Lines Metadata -->
+          <div class="footer-metadata">
+            <div><span class="label">DB:</span> <span class="value">LOCAL_BROWSER</span></div>
+            <div><span class="label">TIME/DATE:</span> <span class="value">PST_FORMAT</span></div>
           </div>
+
+          <!-- Right: Icons with Labels at Bottom -->
           <div class="footer-icons">
-            <button title="Export CSV" class="icon-btn sq-btn" onclick="exportCSV()">
-              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-              </svg>
-            </button>
-            <button title="Copy All Logs" class="icon-btn sq-btn" onclick="copyLog()">
-              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                <path
-                  d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
-                ></path>
-                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-              </svg>
-            </button>
-            <button title="Backup Data (JSON)" class="icon-btn sq-btn" onclick="exportJSON()">
-              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-            </button>
-            <button
-              title="Restore Data (JSON)"
-              class="icon-btn sq-btn"
-              onclick="document.getElementById('import-file').click()"
-            >
-              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
-            </button>
-            <button
-              title="Reset Entire Tracker"
-              class="icon-btn sq-btn danger-icon"
-              onclick="clearAllData()"
-            >
-              <svg viewBox="0 0 24 24" stroke="#f87171" fill="none" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path
-                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                ></path>
-              </svg>
-            </button>
+            <div class="icon-stack">
+              <button title="Export CSV" class="icon-btn sq-btn" onclick="exportCSV()">
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+              </button>
+              <span class="icon-tag">CSV</span>
+            </div>
+
+            <div class="icon-stack">
+              <button title="Copy Logs" class="icon-btn sq-btn" onclick="copyLog()">
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+                  <path
+                    d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+                  ></path>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                </svg>
+              </button>
+              <span class="icon-tag">COPY</span>
+            </div>
+
+            <div class="icon-stack">
+              <button title="Backup JSON" class="icon-btn sq-btn" onclick="exportJSON()">
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              </button>
+              <span class="icon-tag">SAVE</span>
+            </div>
+
+            <div class="icon-stack">
+              <button
+                title="Restore JSON"
+                class="icon-btn sq-btn"
+                onclick="document.getElementById('import-file').click()"
+              >
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+              </button>
+              <span class="icon-tag">LOAD</span>
+            </div>
+
+            <div class="footer-divider"></div>
+
+            <div class="icon-stack">
+              <button
+                title="Factory Reset"
+                class="icon-btn sq-btn danger-icon"
+                onclick="clearAllData()"
+              >
+                <svg viewBox="0 0 24 24" stroke="#f87171" fill="none" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                  ></path>
+                </svg>
+              </button>
+              <span class="icon-tag" style="color: var(--accent-break)">WIPE</span>
+            </div>
             <input type="file" id="import-file" accept=".json" style="display: none" />
           </div>
         </div>
@@ -2677,6 +2935,7 @@
       const GOAL_M_KEY = "production_goal_m_v2";
       const TZ_KEY = "production_tz_pref";
       const THEME_KEY = "production_theme_pref";
+      const PRESET_VALUES_KEY = "production_custom_presets_v2";
 
       // Inactivity / Idle limits (30 Minutes threshold)
       const IDLE_THRESHOLD = 30 * 60 * 1000;
@@ -2719,13 +2978,26 @@
       let pendingSubmitData = null;
       let lastActivity = Date.now();
       let activityThrottle = false;
-      let editingLogIndex = -1;
+      let editingLogId = null;
       let cachedBaseFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
 
       // Memory Caches
       let cachedLogs = [];
       let virtualScrollLogs = [];
+      let lastVirtualStart = -1; // Skip DOM rebuild when visible range unchanged
+      let lastVirtualEnd = -1;
+      let selectedLogIdx = -1; // Keyboard-navigated row index into virtualScrollLogs
       let weeklyCache = new Map(); // Key: UTC Monday Epoch Milliseconds
+      let filterCache = null; // Memoized result of getFilteredLogs()
+      let filterCacheKey = null; // Serialized filter state for cache invalidation
+      let insightsCacheKey = null; // Memoized insights render key
+      let dataVersion = 0; // Incremented on every data mutation; used for cache keys
+      const faviconLink = document.querySelector("link[rel='icon']");
+      let lastFaviconKey = "";
+
+      function getDotSVG(color, opacity = 1) {
+        return `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='${encodeURIComponent(color)}' fill-opacity='${opacity}'/></svg>`;
+      }
 
       /*==========================================================================
        * 2. DOM ELEMENT BINDINGS
@@ -2760,6 +3032,13 @@
         noteModalText: document.getElementById("note-modal-text"),
         ghostModal: document.getElementById("ghost-modal"),
         noteSuggestions: document.getElementById("note-suggestions"),
+        progressRail: document.querySelector(".progress-rail"),
+        progressSegments: Array.from({ length: 5 }, (_, i) =>
+          document.querySelector(`.progress-segment[data-day="${i + 1}"]`),
+        ),
+        progressSegmentFills: Array.from({ length: 5 }, (_, i) =>
+          document.querySelector(`.progress-segment[data-day="${i + 1}"] .progress-segment-fill`),
+        ),
       };
 
       /*==========================================================================
@@ -2885,14 +3164,12 @@
 
       /**
        * Persists historical logs grouped into chronological chunk blocks.
+       * Uses targeted put/delete per chunk instead of clear+rewrite — O(1) I/O relative to history size.
        * @param {Array} logsData - Full array of log entries to divide and save.
        */
       async function saveLogsToDB(logsData) {
         const db = await dbPromise;
         return new Promise((resolve) => {
-          const tx = db.transaction("logs_chunked", "readwrite");
-          const store = tx.objectStore("logs_chunked");
-
           // Regroup logs chronologically into month-level buckets (e.g. "2026-05")
           const chunks = {};
           logsData.forEach((log) => {
@@ -2902,14 +3179,23 @@
             chunks[chunkId].push(log);
           });
 
-          // Wipe obsolete records and overwrite fresh chunks atomically
-          const reqClear = store.clear();
-          reqClear.onsuccess = () => {
-            Object.keys(chunks).forEach((chunkId) => {
-              store.put({ chunkId, data: chunks[chunkId] });
+          const tx = db.transaction("logs_chunked", "readwrite");
+          const store = tx.objectStore("logs_chunked");
+
+          // Get existing keys to find chunks that became empty and need deletion
+          const reqKeys = store.getAllKeys();
+          reqKeys.onsuccess = () => {
+            const newKeySet = new Set(Object.keys(chunks));
+            // Delete stale chunks (e.g. entire month was cleared)
+            reqKeys.result.forEach((k) => {
+              if (!newKeySet.has(k)) store.delete(k);
             });
-            resolve();
+            // Put only the chunks that exist in current data
+            newKeySet.forEach((chunkId) => store.put({ chunkId, data: chunks[chunkId] }));
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => resolve();
           };
+          reqKeys.onerror = () => resolve();
         });
       }
 
@@ -2918,43 +3204,66 @@
        * @returns {Promise<Array>} Decoded array of sorted shift entries.
        */
       async function loadLogsFromDB() {
-        const db = await dbPromise;
+        let db;
+        try {
+          db = await dbPromise;
+        } catch (e) {
+          console.warn("IndexedDB unavailable (private mode or corrupted):", e);
+          showAppToast("Storage unavailable — running in session-only mode.");
+          return [];
+        }
         return new Promise((resolve) => {
-          const txCheck = db.transaction(["logs", "logs_chunked"], "readonly");
-          const reqCheck = txCheck.objectStore("logs").get("all_logs");
-
-          reqCheck.onsuccess = () => {
-            if (reqCheck.result && reqCheck.result.data) {
-              // Migrate old singular large array blocks to structural chunks
-              const oldLogs = reqCheck.result.data;
-              saveLogsToDB(oldLogs).then(() => {
-                const txDel = db.transaction("logs", "readwrite");
-                txDel.objectStore("logs").delete("all_logs");
-              });
-              resolve(oldLogs);
-            } else {
-              // Fetch chunk records and stitch them together sequentially
-              const txChunk = db.transaction("logs_chunked", "readonly");
-              const reqChunk = txChunk.objectStore("logs_chunked").getAll();
-              reqChunk.onsuccess = () => {
-                if (reqChunk.result) {
-                  reqChunk.result.sort((a, b) => b.chunkId.localeCompare(a.chunkId));
-                  let allLogs = [];
-                  reqChunk.result.forEach((chunk) => {
-                    allLogs = allLogs.concat(chunk.data);
-                  });
-                  // Seed lookup index shortcuts on runtime load for O(1) performance virtual list mapping
-                  for (let i = 0; i < allLogs.length; i++) {
-                    allLogs[i]._idx = i;
-                  }
-                  resolve(allLogs);
-                } else {
-                  resolve([]);
-                }
-              };
+          let settled = false;
+          const done = (val) => {
+            if (!settled) {
+              settled = true;
+              resolve(val);
             }
           };
-          reqCheck.onerror = () => resolve([]);
+
+          try {
+            const txCheck = db.transaction(["logs", "logs_chunked"], "readonly");
+            const reqCheck = txCheck.objectStore("logs").get("all_logs");
+
+            reqCheck.onsuccess = () => {
+              if (reqCheck.result && reqCheck.result.data) {
+                const oldLogs = reqCheck.result.data;
+                saveLogsToDB(oldLogs).then(() => {
+                  const txDel = db.transaction("logs", "readwrite");
+                  txDel.objectStore("logs").delete("all_logs");
+                });
+                done(oldLogs);
+              } else {
+                const txChunk = db.transaction("logs_chunked", "readonly");
+                const reqChunk = txChunk.objectStore("logs_chunked").getAll();
+                reqChunk.onsuccess = () => {
+                  if (reqChunk.result) {
+                    reqChunk.result.sort((a, b) => b.chunkId.localeCompare(a.chunkId));
+                    let allLogs = [];
+                    reqChunk.result.forEach((chunk) => {
+                      allLogs = allLogs.concat(chunk.data);
+                    });
+                    for (let i = 0; i < allLogs.length; i++) allLogs[i]._idx = i;
+                    done(allLogs);
+                  } else {
+                    done([]);
+                  }
+                };
+                reqChunk.onerror = () => {
+                  console.warn("Chunk read failed");
+                  done([]);
+                };
+              }
+            };
+            reqCheck.onerror = () => {
+              console.warn("DB check failed");
+              done([]);
+            };
+          } catch (e) {
+            console.warn("loadLogsFromDB transaction error:", e);
+            showAppToast("Could not read storage — data may be unavailable.");
+            done([]);
+          }
         });
       }
 
@@ -3074,6 +3383,10 @@
           logs[i]._idx = i;
         }
         cachedLogs = logs;
+        filterCache = null; // Invalidate filter cache on data change
+        filterCacheKey = null;
+        insightsCacheKey = null; // Invalidate insights cache on data change
+        dataVersion++; // Bump version for all derivative caches
         rebuildWeeklyCache();
         saveLogsToDB(logs);
       }
@@ -3087,14 +3400,14 @@
         weeklyCache.clear();
         for (let i = 0; i < logs.length; i++) {
           const log = logs[i];
+          // Guard: skip logs with missing or zero epochMs (bad imports)
+          if (!log.epochMs || log.epochMs <= 0) continue;
           const daysSinceEpoch = Math.floor(log.epochMs / 86400000);
-          const dayOfWeek = (daysSinceEpoch + 4) % 7; // 0=Sunday, 1=Monday...
+          const dayOfWeek = (daysSinceEpoch + 4) % 7;
           const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-          const key = log.epochMs + diffToMonday * 86400000;
+          const key = (daysSinceEpoch + diffToMonday) * 86400000; // Monday midnight UTC ms
 
-          if (!weeklyCache.has(key)) {
-            weeklyCache.set(key, []);
-          }
+          if (!weeklyCache.has(key)) weeklyCache.set(key, []);
           weeklyCache.get(key).push(log);
         }
       }
@@ -3320,28 +3633,34 @@
           : getCurrentBreakSeconds(nowMs);
 
         // Browser active tab status title update
-        let icon = "⚪";
-        let status = "Paused";
-        let timeStr = formatDuration(workSeconds);
+        let activeTitle = "Paused";
+        let iconColor = "#f59e0b"; // Yellow
+        let isPulsing = false;
 
         if (state.currentMode === "work") {
-          icon = "🟢";
-          status = "Work";
-          timeStr = formatDuration(workSeconds);
+          activeTitle = formatDuration(workSeconds);
+          iconColor = "#4ade80"; // Green
+          isPulsing = true;
         } else if (state.currentMode === "break") {
-          icon = "🔴";
-          status = "Break";
-          timeStr = formatDuration(breakSeconds);
+          activeTitle = formatDuration(breakSeconds);
+          iconColor = "#f87171"; // Red
+          isPulsing = true;
         }
-        document.title = `${icon} ${status} | ${timeStr}`;
+
+        if (document.title !== activeTitle) document.title = activeTitle;
+        const faviconKey = iconColor;
+        if (faviconKey !== lastFaviconKey) {
+          lastFaviconKey = faviconKey;
+          if (faviconLink) faviconLink.href = getDotSVG(iconColor, 1);
+        }
 
         // Refresh daily targets
         updateProgress(workSeconds);
 
         // Render visible controls
         if (!document.hidden) {
-          setText(DOM.workTimer, formatDuration(workSeconds));
-          setText(DOM.breakTimer, formatDuration(breakSeconds));
+          updateTickerDisplay(DOM.workTimer, formatDuration(workSeconds));
+          updateTickerDisplay(DOM.breakTimer, formatDuration(breakSeconds));
           setText(DOM.primaryClock, primaryFormatter.format(nowDate));
           setText(DOM.bstClock, bstFormatter.format(nowDate));
         }
@@ -3358,20 +3677,52 @@
         const percent = goalSec > 0 ? Math.min((workSeconds / goalSec) * 100, 100) : 100;
         const scaleValue = percent / 100;
 
+        // Update Main UI Progress Rail
         setStyle(DOM.progressFill, "transform", `scaleX(${scaleValue})`);
-        setStyle(
-          DOM.progressFill,
-          "background",
-          percent >= 100 ? "var(--accent-work)" : "var(--accent-blue)",
-        );
+
+        if (percent >= 100) {
+          // Laser Green Bloom
+          setStyle(DOM.progressFill, "background", "var(--accent-work)");
+          setStyle(
+            DOM.progressFill,
+            "boxShadow",
+            "0 0 12px var(--accent-work), 0 0 35px color-mix(in srgb, var(--accent-work) 50%, transparent)",
+          );
+        } else {
+          // Laser Blue Bloom
+          setStyle(DOM.progressFill, "background", "var(--accent-blue)");
+          setStyle(
+            DOM.progressFill,
+            "boxShadow",
+            "0 0 10px var(--accent-blue), 0 0 30px color-mix(in srgb, var(--accent-blue) 40%, transparent)",
+          );
+        }
+
+        // LIVE UPDATE: Small Weekly Progress Boxes
+        const nowPST = getPSTDateObj();
+        const dayIdx = nowPST.getDay(); // 0 (Sun) to 6 (Sat)
+        const isoDay = dayIdx === 0 ? 7 : dayIdx; // 1 (Mon) to 7 (Sun)
+
+        // Only update the segment if today is a weekday (Mon-Fri)
+        if (isoDay <= 5) {
+          const todaySegmentFill = DOM.progressSegmentFills[isoDay - 1];
+          if (todaySegmentFill) {
+            todaySegmentFill.style.transform = `scaleX(${scaleValue})`;
+            if (percent >= 100) {
+              todaySegmentFill.style.background = "var(--accent-work)";
+            } else {
+              todaySegmentFill.style.background =
+                "linear-gradient(135deg, var(--accent-blue) 0%, #4f46e5 100%)";
+            }
+          }
+        }
 
         // Toggle celebratory ambient glow class on progress rail
-        const rail = document.querySelector(".progress-rail");
-        if (rail) {
+        if (DOM.progressRail) {
           if (workSeconds >= goalSec && goalSec > 0) {
-            rail.classList.add("goal-completed");
+            DOM.progressRail.classList.add("goal-completed");
           } else {
-            rail.classList.remove("goal-completed");
+            DOM.progressRail.classList.remove("goal-completed");
           }
         }
 
@@ -3654,7 +4005,7 @@
       /**
        * Generates structural HTML templates representing historical logs.
        */
-      function generateLogRow(log, index) {
+      function generateLogRow(log, index, isSelected = false) {
         const hasNote = !!log.notes;
         const noteIconClass = hasNote ? "icon-btn note-active" : "icon-btn";
         const displayStatus = log.status === "OVER" ? "Over" : "Under";
@@ -3673,9 +4024,10 @@
         // Calculate friendly delta dynamically to maintain full database backward compatibility
         const rawDeltaSec = Math.abs(log.workSec - (log.dayGoal || 8 * 3600));
         const friendlyDiff = formatFriendlyDuration(rawDeltaSec, "0m");
+        const selectedClass = isSelected ? " kb-selected" : "";
 
         return `
-        <div class="log-row">
+        <div class="log-row${selectedClass}">
             <!-- TOP ROW -->
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div style="display: flex; align-items: center;">
@@ -4061,7 +4413,8 @@
       }
 
       /**
-       * Returns logs array filtered by user preferences.
+       * Returns logs array filtered by user preferences. Result is memoized and only
+       * recomputed when filter state or underlying data changes.
        * @returns {Array} Filtered list.
        */
       function getFilteredLogs() {
@@ -4073,6 +4426,8 @@
         const dateEndVal = document.getElementById("filter-date-end").value;
         const hoursOp = DOM.filterHoursOp.value;
         const hoursVal = parseFloat(DOM.filterHoursVal.value) || 0;
+
+        // Fast path: no filters active
         if (
           timeFilter === "ALL" &&
           status === "ALL" &&
@@ -4083,6 +4438,10 @@
         ) {
           return logs;
         }
+
+        // Build a cache key from current filter state + log count (length is a cheap proxy for data change)
+        const cacheKey = `${timeFilter}|${status}|${hasNotes}|${dateStartVal}|${dateEndVal}|${hoursOp}|${hoursVal}|${logs.length}`;
+        if (filterCache && filterCacheKey === cacheKey) return filterCache;
 
         const todayStr = getPSTDate();
         const now = new Date(getTrueTime());
@@ -4098,7 +4457,7 @@
         let startMs = dateStartVal ? new Date(dateStartVal).getTime() : null;
         let endMs = dateEndVal ? new Date(dateEndVal).getTime() : null;
 
-        return logs.filter((l) => {
+        const result = logs.filter((l) => {
           let matchTime = true;
           if (timeFilter === "TODAY") matchTime = l.date === todayStr;
           else if (timeFilter === "WEEK") matchTime = l.epochMs >= weekStartMs;
@@ -4122,6 +4481,9 @@
 
           return matchTime && matchStatus && matchNotes && matchDate && matchHours;
         });
+        filterCache = result;
+        filterCacheKey = cacheKey;
+        return result;
       }
 
       // Performance window listener bound to view port resize adjustments
@@ -4158,13 +4520,19 @@
           Math.ceil((scrollTop + viewportHeight) / itemHeight) + overscan,
         );
 
+        // Skip DOM rebuild if the visible range hasn't changed
+        if (startIndex === lastVirtualStart && endIndex === lastVirtualEnd) return;
+        lastVirtualStart = startIndex;
+        lastVirtualEnd = endIndex;
+
         let html = "";
         for (let i = startIndex; i <= endIndex; i++) {
           const log = virtualScrollLogs[i];
           const top = i * itemHeight;
+          const isSelected = i === selectedLogIdx;
           // Optimization: Pre-assigned indexes avoid O(N) linear array iterations
-          const rowHtml = generateLogRow(log, log._idx);
-          html += rowHtml.replace('class="log-row"', `class="log-row" style="top: ${top}px;"`);
+          const rowHtml = generateLogRow(log, log._idx, isSelected);
+          html += rowHtml.replace(/(<div class="log-row[^>]*)>/, `$1 style="top: ${top}px;">`);
         }
         DOM.logContainer.innerHTML = html;
       }
@@ -4175,6 +4543,9 @@
       function renderLogbook() {
         updateFilterIconState();
         virtualScrollLogs = getFilteredLogs();
+        selectedLogIdx = -1; // Clear keyboard selection on data/filter change
+        lastVirtualStart = -1; // Force re-render after data/filter change
+        lastVirtualEnd = -1;
         const itemHeight = getDynamicItemHeight();
         const countDisplay = document.getElementById("log-count-display");
         if (countDisplay) {
@@ -4192,9 +4563,9 @@
             timeFilter || statusFilter || notesFilter || dateStart || dateEnd || hoursFilter;
 
           if (isFiltering) {
-            countDisplay.textContent = `Showing ${filteredCount.toLocaleString()} of ${totalLogsCount.toLocaleString()} Shift${totalLogsCount !== 1 ? "s" : ""}`;
+            countDisplay.textContent = `Showing ${filteredCount.toLocaleString()} of ${totalLogsCount.toLocaleString()} log${totalLogsCount !== 1 ? "s" : ""}`;
           } else {
-            countDisplay.textContent = `${totalLogsCount.toLocaleString()} shift${totalLogsCount !== 1 ? "s" : ""}`;
+            countDisplay.textContent = `${totalLogsCount.toLocaleString()} Log${totalLogsCount !== 1 ? "s" : ""}`;
           }
         }
 
@@ -4208,7 +4579,7 @@
               <line x1="8" y1="2" x2="8" y2="6"></line>
               <line x1="3" y1="10" x2="21" y2="10"></line>
             </svg>
-            <span style="font-size: 0.85rem; font-weight: 600;">No shifts found</span>
+            <span style="font-size: 0.85rem; font-weight: 600;">No logs found</span>
             <span style="font-size: 0.75rem; opacity: 0.7;">Adjust your filters or log some time!</span>
           </div>`;
         } else {
@@ -4236,8 +4607,12 @@
         mondayUTC.setUTCDate(dObj.getUTCDate() + diffToMonday);
         mondayUTC.setUTCHours(0, 0, 0, 0);
         const weekStartMs = mondayUTC.getTime();
-
         const todayStr = getPSTDate();
+
+        // Skip full re-render if week, today, and data are unchanged
+        const iKey = `${weekStartMs}|${todayStr}|${dataVersion}`;
+        if (iKey === insightsCacheKey) return;
+        insightsCacheKey = iKey;
         const weeklyLogs = weeklyCache.get(weekStartMs) || [];
         const logsByDate = {};
         for (let i = 0; i < weeklyLogs.length; i++) {
@@ -4247,7 +4622,7 @@
           }
           logsByDate[l.displayDate].w += l.workSec;
           logsByDate[l.displayDate].b += l.breakSec;
-          if (l.dayGoal) {
+          if (l.dayGoal && logsByDate[l.displayDate].goal === 0) {
             logsByDate[l.displayDate].goal = l.dayGoal;
           }
         }
@@ -4360,9 +4735,13 @@
           currentMonday.getDate(),
         );
 
-        document.querySelectorAll(".progress-segment").forEach((seg) => {
-          seg.classList.remove("is-today");
-          seg.querySelector(".progress-segment-fill").style.transform = "scaleX(0)";
+        DOM.progressSegments.forEach((seg, index) => {
+          if (seg) {
+            seg.classList.remove("is-today");
+            if (DOM.progressSegmentFills[index]) {
+              DOM.progressSegmentFills[index].style.transform = "scaleX(0)";
+            }
+          }
         });
 
         // Update segment bars (Monday through Friday)
@@ -4378,16 +4757,15 @@
           const savedGoal = logsByDate[dateStr] ? logsByDate[dateStr].goal : 0;
           const denominator = isToday ? dailyGoalSec : savedGoal || 28800;
 
-          const segment = document.querySelector(`.progress-segment[data-day="${i + 1}"]`);
+          const segment = DOM.progressSegments[i];
           if (segment) {
+            const fill = DOM.progressSegmentFills[i];
             const fillScale = Math.min(dayWorkSeconds / denominator, 1);
-            segment.querySelector(".progress-segment-fill").style.transform =
-              `scaleX(${fillScale})`;
+            fill.style.transform = `scaleX(${fillScale})`;
             if (dayWorkSeconds >= denominator && dayWorkSeconds > 0) {
-              segment.querySelector(".progress-segment-fill").style.background =
-                "var(--accent-work)";
+              fill.style.background = "var(--accent-work)";
             } else {
-              segment.querySelector(".progress-segment-fill").style.background =
+              fill.style.background =
                 "linear-gradient(135deg, var(--accent-blue) 0%, #4f46e5 100%)";
             }
             if (weekStartMs === currentWeekStartMs && i + 1 === (nowDay === 0 ? 7 : nowDay)) {
@@ -4483,7 +4861,7 @@
         const logs = getLogs();
         const log = logs[index];
         if (!log) return;
-        editingLogIndex = index;
+        editingLogId = log._idx;
         document.getElementById("edit-date").value = log.date;
         document.getElementById("edit-work").value = formatDuration(log.workSec).slice(0, 5);
         document.getElementById("edit-break").value = formatDuration(log.breakSec).slice(0, 5);
@@ -4493,16 +4871,16 @@
 
       function closeEditModal() {
         document.getElementById("edit-modal").style.display = "none";
-        editingLogIndex = -1;
+        editingLogId = null;
       }
 
       /**
        * Parses and updates structural values changes in shift log.
        */
       function saveEditModal() {
-        if (editingLogIndex === -1) return;
+        if (editingLogId === null) return;
         const logs = getLogs();
-        const log = logs[editingLogIndex];
+        const log = logs.find((l) => l._idx === editingLogId);
         if (!log) return;
 
         const newDate = document.getElementById("edit-date").value.trim();
@@ -4526,9 +4904,13 @@
           log.epochMs = Date.UTC(parseInt(fullYear), parseInt(m) - 1, parseInt(d));
           log.notes = newNotes;
           log.searchStr = `${log.displayDate} ${log.date} ${log.notes || ""}`.toLowerCase();
-          logs[editingLogIndex] = log;
+          // log is a reference into the logs array — mutation is sufficient, no reassignment needed
           saveLogs(logs);
-          renderLogbook();
+          // Targeted refresh: list structure unchanged, only row content changed
+          virtualScrollLogs = getFilteredLogs();
+          lastVirtualStart = -1;
+          lastVirtualEnd = -1;
+          renderVirtualVisibleItems();
           renderInsights();
           closeEditModal();
           showAppToast("Shift updated successfully.");
@@ -4540,13 +4922,15 @@
       /**
        * Removes structural log element.
        */
-      function deleteSingleShift(index) {
+      function deleteSingleShift(idx) {
         openConfirmModal(
           "Delete Shift",
           "Are you sure you want to delete this shift? This cannot be undone.",
           () => {
             const logs = getLogs();
-            logs.splice(index, 1);
+            const pos = logs.findIndex((l) => l._idx === idx);
+            if (pos === -1) return;
+            logs.splice(pos, 1);
             saveLogs(logs);
             renderLogbook();
             renderInsights();
@@ -4565,7 +4949,10 @@
        */
       function exportCSV() {
         const logs = getFilteredLogs();
-        if (!logs.length) return;
+        if (!logs.length) {
+          showAppToast("No logs to export");
+          return;
+        }
 
         let csv = "Date,Login,Logout,Work Time,Work (Hrs),Break Time,Net Delta (Hrs),Notes\n";
 
@@ -4589,6 +4976,7 @@
         a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
         a.download = `Production_Report.csv`;
         a.click();
+        showAppToast("Exported logs as CSV");
       }
 
       /**
@@ -4601,12 +4989,19 @@
           goalH: localStorage.getItem(GOAL_H_KEY) || 8,
           goalM: localStorage.getItem(GOAL_M_KEY) || 0,
         };
+
+        if (data.logs.length === 0) {
+          showAppToast("No data to backup");
+          return;
+        }
+
         const a = document.createElement("a");
         a.href = URL.createObjectURL(
           new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }),
         );
         a.download = `Backup_${getPSTDate().replace(/\//g, "-")}.json`;
         a.click();
+        showAppToast("JSON Backup created");
       }
 
       /**
@@ -4675,14 +5070,17 @@
        * Copies full filtered summaries formatted inside tabular textual shapes.
        */
       function copyLog() {
-        const logs = getFilteredLogs();
-        if (!logs.length) return;
+        const allLogs = getLogs();
+        const filteredLogs = getFilteredLogs();
+
+        if (!filteredLogs.length) {
+          showAppToast("No logs found to copy");
+          return;
+        }
 
         const grp = {};
-        logs.forEach((l) => {
-          if (!grp[l.date]) {
-            grp[l.date] = { shifts: [], w: 0, b: 0 };
-          }
+        filteredLogs.forEach((l) => {
+          if (!grp[l.date]) grp[l.date] = { shifts: [], w: 0, b: 0 };
           grp[l.date].shifts.push(l);
           grp[l.date].w += l.workSec;
           grp[l.date].b += l.breakSec;
@@ -4692,21 +5090,24 @@
           .map((d) => {
             let out = `📅 ${d}\n`;
             grp[d].shifts.forEach((s, i) => {
-              out += `  • Shift ${i + 1}: ${s.login} - ${s.logout} (W: ${formatDuration(s.workSec)} | B: ${formatDuration(
-                s.breakSec,
-              )})${s.notes ? " | Note: " + s.notes : ""}\n`;
+              out += `  • Shift ${i + 1}: ${s.login} - ${s.logout} (W: ${formatDuration(s.workSec)} | B: ${formatDuration(s.breakSec)})${s.notes ? " | Note: " + s.notes : ""}\n`;
             });
-
             const warning = grp[d].w < 7 * 3600 ? " ⚠️ (Under 7h)" : "";
-            out += `  ---\n`;
-            out += `  ✅ Total Work: ${formatDuration(grp[d].w)}${warning}\n`;
-            out += `  ☕ Total Break: ${formatDuration(grp[d].b)}\n`;
-            out += `  🏢 Total Logged: ${formatDuration(grp[d].w + grp[d].b)}`;
+            out += `  ---\n  ✅ Total Work: ${formatDuration(grp[d].w)}${warning}\n  ☕ Total Break: ${formatDuration(grp[d].b)}\n  🏢 Total Logged: ${formatDuration(grp[d].w + grp[d].b)}`;
             return out;
           })
           .join("\n\n");
 
-        navigator.clipboard.writeText(txt).then(() => showAppToast("Copied to clipboard."));
+        navigator.clipboard.writeText(txt).then(() => {
+          // DYNAMIC TOAST LOGIC:
+          if (filteredLogs.length === allLogs.length) {
+            // No filters are active (or filters happen to include everything)
+            showAppToast(`Copied all ${filteredLogs.length} logs to clipboard`);
+          } else {
+            // A filter is clearly restricting the list
+            showAppToast(`Copied ${filteredLogs.length} filtered logs`);
+          }
+        });
       }
 
       /**
@@ -4774,21 +5175,23 @@
           }
         }
 
-        // Repaint idle duration displays
-        if (state.idleLock) {
-          document.getElementById("idle-modal").style.display = "flex";
-          setText(
-            document.getElementById("idle-duration-text"),
-            formatDuration((nowMs - state.idleStart) / 1000),
-          );
-        }
+        if (!document.hidden) {
+          // Repaint idle duration displays
+          if (state.idleLock) {
+            document.getElementById("idle-modal").style.display = "flex";
+            setText(
+              document.getElementById("idle-duration-text"),
+              formatDuration((nowMs - state.idleStart) / 1000),
+            );
+          }
 
-        renderTimersOnly(now);
+          renderTimersOnly(now);
 
-        try {
-          updateLastSeenUI();
-        } catch (err) {
-          console.error("LastSeen Error:", err);
+          try {
+            updateLastSeenUI();
+          } catch (err) {
+            console.error("LastSeen Error:", err);
+          }
         }
 
         checkMidnightReset(now);
@@ -4796,6 +5199,11 @@
         // Loop timing synchronization
         setTimeout(tick, 1000 - (nowMs % 1000));
       }
+
+      // Repaint immediately when user returns to tab — avoids 1s stale display
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) renderTimersOnly();
+      });
 
       /*==========================================================================
        * 18. APPLICATION SHORTCUT HOTKEYS & AUDIOS
@@ -4817,6 +5225,41 @@
         if (e.key.toLowerCase() === "s") {
           if (DOM.submitModal.style.display !== "flex") {
             openSubmitModal();
+          }
+        }
+
+        // Logbook keyboard navigation (ArrowUp/Down/Enter/Delete) — only when logbook tab is visible
+        const logbookTab = document.getElementById("tab-logbook");
+        if (logbookTab && logbookTab.style.display !== "none" && virtualScrollLogs.length > 0) {
+          if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+            e.preventDefault();
+            const dir = e.key === "ArrowDown" ? 1 : -1;
+            selectedLogIdx = Math.max(
+              0,
+              Math.min(virtualScrollLogs.length - 1, selectedLogIdx + dir),
+            );
+            // Scroll selected row into view
+            const itemHeight = getDynamicItemHeight();
+            const scrollTop = logbookTab.scrollTop;
+            const viewH = logbookTab.clientHeight;
+            const rowTop = selectedLogIdx * itemHeight;
+            if (rowTop < scrollTop) logbookTab.scrollTop = rowTop;
+            else if (rowTop + itemHeight > scrollTop + viewH)
+              logbookTab.scrollTop = rowTop + itemHeight - viewH;
+            lastVirtualStart = -1;
+            lastVirtualEnd = -1;
+            renderVirtualVisibleItems();
+          } else if (e.key === "Enter" && selectedLogIdx >= 0) {
+            const log = virtualScrollLogs[selectedLogIdx];
+            if (log && log.notes) openNoteModal(log.notes);
+          } else if (e.key === "Delete" && selectedLogIdx >= 0) {
+            const log = virtualScrollLogs[selectedLogIdx];
+            if (log) deleteSingleShift(log._idx);
+          } else if (e.key === "Escape") {
+            selectedLogIdx = -1;
+            lastVirtualStart = -1;
+            lastVirtualEnd = -1;
+            renderVirtualVisibleItems();
           }
         }
       });
@@ -5026,6 +5469,62 @@
 
         renderTimersOnly();
         renderInsights();
+        updatePresetHighlights(); // Updates the blue buttons when you finish typing
+      };
+
+      // --- NEW COMBINED PRESET & ADJUSTMENT SYSTEM ---
+      function getSavedPresets() {
+        const saved = localStorage.getItem(PRESET_VALUES_KEY);
+        return saved ? JSON.parse(saved) : [4, 6, 8];
+      }
+
+      function renderPresets() {
+        const presets = getSavedPresets();
+        presets.forEach((val, index) => {
+          const btn = document.getElementById(`preset-${index}`);
+          if (btn) {
+            btn.textContent = val + "h";
+            btn.setAttribute("data-hours", val);
+            btn.onclick = () => window.setGoalPreset(val);
+          }
+        });
+        updatePresetHighlights();
+      }
+
+      let editingPresetIndex = -1;
+
+      window.changePreset = function (index) {
+        editingPresetIndex = index;
+        const presets = getSavedPresets();
+        const input = document.getElementById("preset-input");
+        input.value = presets[index];
+        document.getElementById("preset-modal").style.display = "flex";
+
+        setTimeout(() => {
+          input.focus();
+          input.select();
+        }, 100);
+      };
+
+      window.closePresetModal = function () {
+        document.getElementById("preset-modal").style.display = "none";
+        editingPresetIndex = -1;
+      };
+
+      window.savePresetModal = function () {
+        if (editingPresetIndex === -1) return;
+        const newVal = parseFloat(document.getElementById("preset-input").value);
+
+        if (!isNaN(newVal) && newVal >= 0 && newVal <= 24) {
+          const presets = getSavedPresets();
+          presets[editingPresetIndex] = newVal;
+          localStorage.setItem(PRESET_VALUES_KEY, JSON.stringify(presets));
+          renderPresets();
+          closePresetModal();
+          showAppToast(`Preset updated to ${newVal}h`);
+        } else {
+          showAppToast("Please enter a valid number (0-24)");
+        }
       };
 
       window.setGoalPreset = function (hours) {
@@ -5034,16 +5533,52 @@
         localStorage.setItem(GOAL_H_KEY, hours);
         localStorage.setItem(GOAL_M_KEY, 0);
         const goalTimeEl = document.getElementById("goal-time");
-        if (goalTimeEl) {
-          goalTimeEl.value = `${hours}h 0m`;
-        }
+        if (goalTimeEl) goalTimeEl.value = `${hours}h 0m`;
+        updatePresetHighlights();
         renderTimersOnly();
         renderInsights();
       };
 
+      window.adjustGoal = function (minutes) {
+        let h = parseInt(DOM.goalHours.value) || 0;
+        let m = parseInt(DOM.goalMins.value) || 0;
+        let totalMins = h * 60 + m + minutes;
+        if (totalMins < 15) totalMins = 15;
+
+        const newH = Math.floor(totalMins / 60);
+        const newM = totalMins % 60;
+
+        DOM.goalHours.value = newH;
+        DOM.goalMins.value = newM;
+        localStorage.setItem(GOAL_H_KEY, newH);
+        localStorage.setItem(GOAL_M_KEY, newM);
+
+        const goalTimeEl = document.getElementById("goal-time");
+        if (goalTimeEl) goalTimeEl.value = `${newH}h ${newM}m`;
+
+        updatePresetHighlights();
+        renderTimersOnly();
+        renderInsights();
+      };
+
+      function updatePresetHighlights() {
+        const currentH = parseFloat(localStorage.getItem(GOAL_H_KEY)) || 0;
+        const currentM = parseFloat(localStorage.getItem(GOAL_M_KEY)) || 0;
+
+        document.querySelectorAll(".dynamic-preset").forEach((btn) => {
+          const btnHours = parseFloat(btn.getAttribute("data-hours"));
+          if (btnHours === currentH && currentM === 0) {
+            btn.classList.add("active");
+          } else {
+            btn.classList.remove("active");
+          }
+        });
+      }
+
       const goalTimeEl = document.getElementById("goal-time");
       if (goalTimeEl) {
         goalTimeEl.addEventListener("blur", handleGoalTimeBlur);
+        goalTimeEl.addEventListener("keydown", blockInvalidKeys);
         goalTimeEl.addEventListener("keydown", (e) => {
           if (e.key === "Enter") {
             goalTimeEl.blur();
@@ -5201,6 +5736,10 @@
         };
 
         setupDynamicPreview();
+        document.getElementById("preset-input").addEventListener("keydown", (e) => {
+          if (e.key === "Enter") savePresetModal();
+          if (e.key === "Escape") closePresetModal();
+        });
       }
 
       // Auto-formatting helper for manual and edit time inputs on blur
@@ -5433,6 +5972,7 @@
       // Insights week shifts navigation selector
       function changeWeekOffset(delta) {
         displayBaseDate.setDate(displayBaseDate.getDate() + delta * 7);
+        insightsCacheKey = null;
         renderInsights();
       }
 
@@ -5506,6 +6046,54 @@
         }
       }
 
+      /**
+       * Creates the 0-9 strips inside each timer once.
+       */
+      function initializeTickers() {
+        const timers = [DOM.workTimer, DOM.breakTimer];
+        timers.forEach((timer) => {
+          timer.innerHTML = ""; // Clear
+          // Pattern: HH:MM:SS (8 slots, including colons)
+          // Indexes: 01 2 34 5 67
+          for (let i = 0; i < 8; i++) {
+            if (i === 2 || i === 5) {
+              const sep = document.createElement("div");
+              sep.className = "timer-separator";
+              sep.textContent = ":";
+              timer.appendChild(sep);
+            } else {
+              const slot = document.createElement("div");
+              slot.className = "digit-slot";
+              const strip = document.createElement("div");
+              strip.className = "digit-strip";
+              for (let n = 0; n <= 9; n++) {
+                const span = document.createElement("span");
+                span.textContent = n;
+                strip.appendChild(span);
+              }
+              slot.appendChild(strip);
+              timer.appendChild(slot);
+            }
+          }
+        });
+      }
+
+      /**
+       * Updates the translateY of each strip based on the time string (e.g. "01:22:05")
+       */
+      function updateTickerDisplay(el, timeStr) {
+        const digitsOnly = timeStr.replace(/:/g, "");
+        const strips = el.querySelectorAll(".digit-strip");
+
+        digitsOnly.split("").forEach((digit, idx) => {
+          const val = parseInt(digit);
+          if (strips[idx]) {
+            // Use exactly -1em per digit value
+            strips[idx].style.transform = `translateY(${val * -1}em)`;
+          }
+        });
+      }
+
       // Persists tracking status configuration variables inside browser cache databases
       function saveState() {
         localStorage.setItem(STATE_KEY, JSON.stringify(state));
@@ -5549,11 +6137,13 @@
         loadSavedFilterViews();
         loadActiveFilters();
 
+        initializeTickers();
         renderStaticUI();
         renderTimersOnly();
         renderLogbook();
         renderInsights();
         renderThemeToggle();
+        renderPresets();
         tick();
 
         // Set up secondary background save task routines (every 5 seconds)
