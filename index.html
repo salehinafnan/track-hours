@@ -1415,6 +1415,49 @@
         -webkit-backdrop-filter: var(--panel-blur);
       }
 
+      #goal-toast {
+        position: fixed;
+        top: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--modal-bg);
+        border: 1px solid var(--border-main);
+        color: var(--text-main);
+        padding: 8px 8px 8px 20px;
+        border-radius: 100px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: top 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        z-index: 4000;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(74, 222, 128, 0.15);
+        backdrop-filter: var(--panel-blur);
+        -webkit-backdrop-filter: var(--panel-blur);
+        border-color: rgba(74, 222, 128, 0.3);
+      }
+
+      #goal-toast .goal-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent-work);
+        filter: drop-shadow(0 0 4px rgba(74, 222, 128, 0.5));
+      }
+
+      #goal-toast .goal-tag {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.7rem;
+        font-weight: 700;
+        background: rgba(74, 222, 128, 0.1);
+        color: var(--accent-work);
+        padding: 4px 10px;
+        border-radius: 100px;
+        border: 1px solid rgba(74, 222, 128, 0.2);
+        letter-spacing: 0.02em;
+      }
+
       /* Screen Adaptive Media Queries */
       @media (max-width: 900px) {
         body {
@@ -2287,22 +2330,15 @@
       </div>
     </div>
 
-    <!-- Daily Goal Reached celebratory modal -->
-    <div id="goal-modal" class="modal-overlay">
-      <div class="modal-container" style="text-align: center; border: 2px solid var(--accent-work)">
-        <h1 style="font-size: 3rem; margin-bottom: 10px">🎉</h1>
-        <h3 style="color: var(--accent-work); margin-bottom: 15px">Daily Goal Reached!</h3>
-        <div style="margin-bottom: 25px; font-size: 0.9rem; color: var(--text-muted)">
-          You've hit your daily production target.
-        </div>
-        <button
-          class="btn-work"
-          style="width: 100%"
-          onclick="document.getElementById('goal-modal').style.display = 'none'"
-        >
-          Got it!
-        </button>
+    <!-- Daily Goal Reached celebratory toast -->
+    <div id="goal-toast">
+      <div class="goal-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
       </div>
+      <span>Daily Goal Reached!</span>
+      <span class="goal-tag" id="goal-toast-time">8.0h</span>
     </div>
 
     <!-- =========================================================================
@@ -3891,7 +3927,17 @@
           !state.goalNotified &&
           state.currentMode === "work"
         ) {
-          document.getElementById("goal-modal").style.display = "flex";
+          const toast = document.getElementById("goal-toast");
+          const timeEl = document.getElementById("goal-toast-time");
+          if (timeEl) {
+            timeEl.innerHTML = formatFriendlyDuration(anchorGoalSec, "0h");
+          }
+          if (toast) {
+            toast.style.top = "30px";
+            setTimeout(() => {
+              toast.style.top = "-100px";
+            }, 5000);
+          }
           playGoalSound();
           state.goalNotified = true;
           saveState();
