@@ -371,12 +371,13 @@
         align-items: center;
       }
 
-      .status-time span {
+      #primary-clock,
+      #bst-clock {
         color: var(--text-main);
         font-size: 1.05rem;
-        margin: 0 0.4rem;
         font-variant-numeric: tabular-nums;
         font-family: var(--font-mono);
+        margin: 0;
       }
 
       .clock-ampm {
@@ -482,33 +483,98 @@
         }
       }
 
-      .tz-select {
-        background: transparent;
-        border: 1px solid transparent;
-        color: var(--accent-blue);
+      .tz-container {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        margin-right: 8px;
+      }
+
+      .tz-trigger {
         font-size: 0.75rem;
         font-weight: 700;
+        color: var(--accent-blue);
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
         padding: 0.25rem 0.4rem;
         border-radius: 0.5rem;
-        cursor: pointer;
-        outline: none;
         transition:
           background 0.2s,
-          border-color 0.2s;
-        margin-right: 0.25rem;
-        appearance: none;
-        -webkit-appearance: none;
-        text-align: center;
+          color 0.2s;
+        user-select: none;
       }
 
-      .tz-select:hover {
+      .tz-trigger:hover {
         background: var(--element-hover);
-        border-color: var(--border-main);
+        color: var(--text-main);
       }
 
-      .tz-select option {
+      .tz-static-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0;
+        margin-right: 8px;
+        user-select: none;
+      }
+
+      .tz-presets {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        opacity: 0;
+        pointer-events: none;
+        display: flex;
+        gap: 6px;
+        padding: 10px 8px 8px;
         background: var(--dropdown-bg);
-        color: var(--text-main);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border-light);
+        border-radius: 14px;
+        box-shadow:
+          0 12px 32px rgba(0, 0, 0, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        transition:
+          opacity 0.15s ease,
+          transform 0.15s ease;
+        transform: translateY(-8px) scale(0.95);
+        z-index: 100;
+      }
+
+      .tz-presets::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: 0;
+        right: 0;
+        height: 10px;
+      }
+
+      .tz-container:hover .tz-presets {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(4px) scale(1);
+        transition:
+          opacity 0.25s ease,
+          transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      }
+
+      .tz-chevron {
+        color: var(--text-muted);
+        transition:
+          transform 0.25s ease,
+          color 0.2s;
+        margin-left: 1px;
+      }
+
+      .tz-container:hover .tz-chevron {
+        transform: rotate(180deg);
+        color: var(--accent-blue);
       }
 
       .goal-inputs {
@@ -2762,15 +2828,50 @@
         <!-- Header Status Bar -->
         <div class="status-bar">
           <div class="status-badge status-time">
-            <select id="primary-tz" class="tz-select">
+            <!-- Hidden native select for standard app compatibility -->
+            <select id="primary-tz" style="display: none">
               <option value="America/Los_Angeles">PST</option>
               <option value="America/Denver">MST</option>
               <option value="America/Chicago">CST</option>
               <option value="America/New_York">EST</option>
             </select>
+
+            <div class="tz-container">
+              <div class="tz-trigger">
+                <span id="tz-current-label">PST</span>
+                <svg
+                  class="tz-chevron"
+                  width="10"
+                  height="10"
+                  viewBox="0 0 10 10"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M2 3.5L5 6.5L8 3.5"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <div class="tz-presets">
+                <button class="preset-pill" onclick="selectPresetTZ('America/Los_Angeles')">
+                  PST
+                </button>
+                <button class="preset-pill" onclick="selectPresetTZ('America/Denver')">MST</button>
+                <button class="preset-pill" onclick="selectPresetTZ('America/Chicago')">CST</button>
+                <button class="preset-pill" onclick="selectPresetTZ('America/New_York')">
+                  EST
+                </button>
+              </div>
+            </div>
+
             <span id="primary-clock">00:00 AM</span>
             <i class="clock-divider"></i>
-            BST: <span id="bst-clock">00:00 PM</span>
+            <span class="tz-static-label">BST</span>
+            <span id="bst-clock">00:00 PM</span>
             <div id="last-seen" class="last-seen-status">Active</div>
           </div>
           <div style="display: flex; gap: 15px; align-items: stretch">
@@ -3822,6 +3923,23 @@
         if (!el) return;
         const html = formattedTime.replace(/\s*(AM|PM)/i, '<span class="clock-ampm">$1</span>');
         if (el.innerHTML !== html) el.innerHTML = html;
+      }
+
+      function selectPresetTZ(tzValue) {
+        const select = document.getElementById("primary-tz");
+        if (select) {
+          select.value = tzValue;
+          select.dispatchEvent(new Event("change"));
+        }
+      }
+
+      function updateTZLabel() {
+        const select = document.getElementById("primary-tz");
+        const label = document.getElementById("tz-current-label");
+        if (select && label) {
+          const activeOpt = select.options[select.selectedIndex];
+          if (activeOpt) label.textContent = activeOpt.textContent;
+        }
       }
 
       function setStyle(el, prop, val) {
@@ -6442,10 +6560,12 @@
 
       // Timezone preferences
       DOM.primaryTz.value = localStorage.getItem(TZ_KEY) || "America/Los_Angeles";
+      updateTZLabel();
       DOM.primaryTz.addEventListener("change", () => {
         localStorage.setItem(TZ_KEY, DOM.primaryTz.value);
         updatePrimaryFormatter();
         renderTimersOnly();
+        updateTZLabel();
       });
 
       // Alert preventing window tabs closing if timer is actively tracking
