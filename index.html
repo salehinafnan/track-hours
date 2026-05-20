@@ -725,7 +725,7 @@
 
       #break-timer {
         /* Adjusted size for better visual weight balance with the work timer */
-        font-size: clamp(2.2rem, 6vw, 4rem);
+        font-size: clamp(2.6rem, 7vw, 4.4rem);
         margin: 0;
       }
 
@@ -740,11 +740,13 @@
 
       /* Spacing between label and timer inside groups */
       .timer-group .label-xs {
+        font-size: 0.85rem;
         margin-bottom: 4px;
       }
 
       /* Inverted spacing for the break group */
       .timer-group.inverted .label-xs {
+        font-size: 0.85rem;
         margin-bottom: 0;
         margin-top: 4px;
       }
@@ -1946,7 +1948,7 @@
         justify-content: flex-start;
         align-items: center;
         gap: 0.1rem;
-        font-size: clamp(3.5rem, 10vw, 6rem);
+        font-size: clamp(4rem, 11vw, 6.5rem);
         line-height: 1;
         font-weight: 700;
         letter-spacing: -0.05em;
@@ -4214,7 +4216,7 @@
         } else {
           if (workSec === 0) {
             setStyle(DOM.workTimer, "color", "var(--text-muted)");
-            setStyle(DOM.workTimer, "opacity", "0.15");
+            setStyle(DOM.workTimer, "opacity", "0.35");
             setStyle(DOM.workTimer, "filter", "grayscale(100%)");
           } else {
             setStyle(DOM.workTimer, "color", "var(--text-main)");
@@ -4230,7 +4232,7 @@
         } else {
           if (breakSec === 0) {
             setStyle(DOM.breakTimer, "color", "var(--text-muted)");
-            setStyle(DOM.breakTimer, "opacity", "0.15");
+            setStyle(DOM.breakTimer, "opacity", "0.35");
             setStyle(DOM.breakTimer, "filter", "grayscale(100%)");
           } else {
             setStyle(DOM.breakTimer, "color", "var(--text-main)");
