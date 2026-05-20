@@ -1275,52 +1275,140 @@
       .footer-icons {
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 12px;
       }
 
       .icon-stack {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 2px;
+        gap: 4px;
       }
 
-      /* Labels at the bottom of icons */
       .icon-tag {
         font-family: var(--font-mono);
-        font-size: 0.45rem;
+        font-size: 0.42rem;
         font-weight: 700;
         color: var(--text-muted);
         text-transform: uppercase;
-        opacity: 0.7;
-        letter-spacing: 0.02em;
+        opacity: 0.55;
+        letter-spacing: 0.06em;
+        transition:
+          opacity 0.25s ease,
+          color 0.25s ease;
+      }
+
+      .icon-stack:hover .icon-tag {
+        opacity: 0.9;
+        color: var(--accent-blue);
+      }
+
+      .icon-stack:has(.danger-icon):hover .icon-tag {
+        color: var(--accent-break) !important;
       }
 
       .sidebar-footer .sq-btn {
-        width: 45px;
-        height: 45px;
+        width: 38px;
+        height: 38px;
         background: var(--element-bg);
         border: 1px solid var(--border-main);
-        border-radius: 10px;
-        transition: all 0.2s ease;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .sidebar-footer .sq-btn svg {
+        width: 17px;
+        height: 17px;
+        transition:
+          transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+          stroke 0.3s ease;
       }
 
       .sidebar-footer .sq-btn:hover {
         background: var(--element-hover);
         border-color: var(--border-light);
         color: var(--text-main);
-        transform: translateY(-1px);
+        transform: translateY(-1.5px);
       }
 
-      .sidebar-footer .sq-btn svg {
-        width: 23px;
-        height: 23px;
+      .sidebar-footer .sq-btn:hover svg {
+        stroke: var(--accent-blue);
+      }
+
+      .sidebar-footer .sq-btn:active {
+        transform: scale(0.93) translateY(0);
+      }
+
+      /* Theme Adjustments */
+      :root[data-theme="midnight"] .sidebar-footer .sq-btn {
+        background: transparent;
+        border-color: transparent;
+      }
+      :root[data-theme="midnight"] .sidebar-footer .sq-btn:hover {
+        background: var(--element-hover);
+        border-color: var(--border-main);
+      }
+
+      :root[data-theme="glass"] .sidebar-footer .sq-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.15),
+          0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Micro-Animations based on button purpose */
+      [title="Export CSV"]:hover svg {
+        transform: translateY(1.5px);
+      }
+      [title="Copy Logs"]:hover svg {
+        transform: scale(1.12) translateY(-0.5px);
+      }
+      [title="Backup JSON"]:hover svg {
+        transform: translateY(1.5px);
+      }
+      [title="Restore JSON"]:hover svg {
+        transform: translateY(-1.5px);
+      }
+
+      /* Destructive Zone Hierarchy & Reactions */
+      .sidebar-footer .sq-btn.danger-icon {
+        background: rgba(248, 113, 113, 0.04);
+        border-color: rgba(248, 113, 113, 0.12);
+      }
+      .sidebar-footer .sq-btn.danger-icon svg {
+        stroke: var(--accent-break) !important;
+      }
+      .sidebar-footer .sq-btn.danger-icon:hover {
+        background: rgba(248, 113, 113, 0.14) !important;
+        border-color: var(--accent-break) !important;
+      }
+      .sidebar-footer .sq-btn.danger-icon:hover svg {
+        animation: trill 0.15s ease infinite;
+      }
+
+      @keyframes trill {
+        0%,
+        100% {
+          transform: rotate(0) scale(1.05);
+        }
+        25% {
+          transform: rotate(-8deg) scale(1.05);
+        }
+        75% {
+          transform: rotate(8deg) scale(1.05);
+        }
       }
 
       /* Separator between standard actions and danger zone */
       .footer-divider {
         width: 1px;
-        height: 34px;
+        height: 28px;
         background: var(--border-main);
         margin: 0 4px;
         align-self: center;
