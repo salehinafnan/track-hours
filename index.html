@@ -1041,22 +1041,26 @@
         margin-bottom: 20px;
         background: var(--element-bg);
         padding: 5px;
-        border-radius: 12px;
+        border-radius: var(--header-el-radius);
         border: 1px solid var(--border-main);
         flex-shrink: 0;
         margin-right: 10px;
+        height: var(--header-el-height);
+        box-sizing: border-box;
+        align-items: stretch;
       }
 
       .tab-btn {
         flex: 1;
-        padding: 8px;
-        border-radius: 8px;
+        border-radius: calc(var(--header-el-radius) - 4px);
         background: transparent;
         color: var(--text-muted);
         font-size: 0.75rem;
         font-weight: 600;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
         border: 1px solid transparent;
       }
