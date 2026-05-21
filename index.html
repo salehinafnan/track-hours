@@ -3323,6 +3323,7 @@
 
       // High-frequency delta anchor and defensive lock flags
       let lastTickTime = Date.now();
+      let lastMonotonicTime = performance.now();
       let isTabConflict = false;
 
       // Memory Caches
@@ -3905,9 +3906,20 @@
         if (isTabConflict) return;
 
         const nowMs = Date.now();
+        const nowMono = performance.now();
         const isBackground = document.hidden;
         const threshold = isBackground ? 75000 : 10000; // Background throttled at 75s, foreground at 10s
         const deltaMs = nowMs - lastTickTime;
+        const deltaMono = nowMono - lastMonotonicTime;
+
+        // Validate system clock jumps (NTP synchronization)
+        const isClockJump =
+          !isBackground && deltaMs > 10000 && deltaMono < 2000;
+        if (isClockJump) {
+          lastTickTime = nowMs;
+          lastMonotonicTime = nowMono;
+          return;
+        }
 
         if (deltaMs > 0) {
           if (deltaMs > threshold) {
@@ -3928,6 +3940,7 @@
           }
         }
         lastTickTime = nowMs;
+        lastMonotonicTime = nowMono;
       }
 
       /**
@@ -6865,6 +6878,7 @@
       }
 
       function saveState() {
+        state.lastHeartbeat = Date.now();
         localStorage.setItem(STATE_KEY, JSON.stringify(state));
       }
 
@@ -6900,6 +6914,19 @@
         displayBaseDate = getPSTDateObj();
         loadState();
 
+        // Persistent Heartbeat Check (Phase 1)
+        if (
+          state.lastHeartbeat &&
+          state.currentMode !== null &&
+          !state.idleLock
+        ) {
+          const gap = Date.now() - state.lastHeartbeat;
+          if (gap > IDLE_THRESHOLD) {
+            // Recover session using the recorded heartbeat timestamp
+            triggerIdleLock(state.lastHeartbeat);
+          }
+        }
+
         loadSavedFilterViews();
         loadActiveFilters();
 
@@ -6911,6 +6938,7 @@
 
         // Synchronize delta tracking anchor on app launch
         lastTickTime = Date.now();
+        lastMonotonicTime = performance.now();
         tick();
       })();
     </script>
