@@ -28,7 +28,7 @@
         /* Shared Color Scheme Accents */
         --accent-work: #4ade80;
         --accent-break: #f87171;
-        --accent-blue: #60a5fa;
+        --accent-blue: #7cb4e8;
         --accent-warning: #f59e0b;
 
         /* Typographic Tokens */
@@ -86,9 +86,9 @@
         --btn-break-bg: #1a0a0a;
         --btn-break-border: #f87171;
         --btn-break-text: #f87171;
-        --btn-log-bg: #ffffff;
-        --btn-log-text: #000000;
-        --btn-log-border: #ffffff;
+        --btn-log-bg: #0a101a;
+        --btn-log-text: var(--accent-blue);
+        --btn-log-border: var(--accent-blue);
         --dropdown-bg: #070708;
         --modal-bg: #070708;
       }
@@ -114,9 +114,9 @@
         --btn-break-bg: #f87171;
         --btn-break-border: #f87171;
         --btn-break-text: #450a0a;
-        --btn-log-bg: #ffffff;
-        --btn-log-text: #000000;
-        --btn-log-border: #ffffff;
+        --btn-log-bg: var(--accent-blue);
+        --btn-log-text: #0f172a;
+        --btn-log-border: var(--accent-blue);
         --dropdown-bg: #0f172a;
         --modal-bg: #0f172a;
       }
@@ -833,7 +833,11 @@
         height: 100%;
         width: 100%;
         transform-origin: left;
-        background: var(--accent-blue);
+        background: linear-gradient(
+          90deg,
+          rgba(241, 245, 249, 0.4) 0%,
+          rgba(241, 245, 249, 0.9) 100%
+        );
         border-radius: 2px;
         box-shadow: none;
         transition: none;
@@ -847,9 +851,10 @@
         top: 0px;
         width: 4px;
         height: 100%;
-        background: #fff;
+        background: #ffffff;
         border-radius: 0;
-        opacity: 0.5;
+        opacity: 1;
+        box-shadow: none;
         transition: opacity 0.15s ease;
       }
 
@@ -1052,7 +1057,7 @@
       }
 
       .btn-log:hover:not(:disabled) {
-        filter: brightness(0.9);
+        filter: brightness(1.2);
       }
 
       /* =========================================================================
@@ -1104,7 +1109,7 @@
       }
 
       .tab-btn:hover {
-        color: var(--text-main);
+        color: var(--accent-blue);
       }
 
       .tab-btn.active {
@@ -1814,28 +1819,40 @@
         transform: scale(0.93) translateY(0);
       }
 
-      /* Inactivity Config Popup Styling */
+      /* Settings Config Popup Styling */
       .idle-popup {
         position: absolute;
         bottom: 110%;
         left: 50%;
         transform: translateX(-50%) translateY(-0.625rem);
-        /* Scales dynamically on window resize */
         background: var(--dropdown-bg);
         border: 1px solid var(--border-light);
         border-radius: 0.75rem;
-        /* Scales dynamically on window resize */
         padding: 0.75rem;
-        /* Scales dynamically on window resize */
-        width: 11.25rem;
-        /* Scales dynamically on window resize */
+        width: 15rem;
+        /* Expanded width for descriptions */
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         z-index: 1500;
         display: none;
         flex-direction: column;
         gap: 0.625rem;
-        /* Scales dynamically on window resize */
         text-align: left;
+      }
+
+      .settings-divider {
+        height: 1px;
+        background: var(--border-main);
+        margin: 0.25rem 0;
+        width: 100%;
+      }
+
+      .settings-description {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        line-height: 1.4;
+        opacity: 0.8;
+        margin-top: 2px;
+        font-weight: 500;
       }
 
       .idle-popup::before {
@@ -1875,8 +1892,9 @@
         font-size: 0.7rem;
         font-weight: 700;
         color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+        text-transform: none;
+        /* Changed from uppercase to respect standard capitalization */
+        letter-spacing: 0.02em;
       }
 
       .idle-popup-val {
@@ -2115,14 +2133,16 @@
 
       .breakdown-row {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 4px 0;
-        font-size: 0.75rem;
+        flex-direction: column;
+        justify-content: center;
+        gap: 4px;
+        height: 54px;
+        padding: 6px 12px;
         border-bottom: 1px solid var(--border-main);
         font-variant-numeric: tabular-nums;
         flex: 1;
         contain: layout paint;
+        box-sizing: border-box;
       }
 
       .breakdown-row:last-child {
@@ -2181,13 +2201,13 @@
       .progress-segment.is-leave {
         background: repeating-linear-gradient(
           45deg,
-          rgba(255, 255, 255, 0.02),
-          rgba(255, 255, 255, 0.02) 6px,
-          rgba(255, 255, 255, 0.07) 6px,
-          rgba(255, 255, 255, 0.07) 12px
+          rgba(255, 255, 255, 0.05),
+          rgba(255, 255, 255, 0.05) 6px,
+          rgba(255, 255, 255, 0.15) 6px,
+          rgba(255, 255, 255, 0.15) 12px
         );
-        border: 1px dashed rgba(255, 255, 255, 0.15);
-        opacity: 0.65;
+        border: 1px dashed rgba(255, 255, 255, 0.25);
+        opacity: 1;
       }
 
       /* =========================================================================
@@ -2715,6 +2735,32 @@
                 margin-top: 2px;
               "
               >Add this duration to your break timer</span
+            >
+          </button>
+          <button
+            class="btn-warning-outline"
+            onclick="resolveIdle('discard')"
+            style="
+              width: 100%;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              padding: var(--space-2) var(--space-4);
+              height: auto;
+            "
+          >
+            <span style="font-weight: 700; font-size: var(--text-sm)"
+              >Discard Idle Time</span
+            >
+            <span
+              style="
+                font-size: 10px;
+                font-weight: 400;
+                opacity: 0.8;
+                margin-top: 2px;
+              "
+              >Remove this gap from tracked time</span
             >
           </button>
         </div>
@@ -3372,7 +3418,7 @@
                   ondblclick="changePreset(0)"
                   title="Double-click to edit preset"
                 >
-                  4h
+                  6h
                 </button>
                 <button
                   class="preset-pill dynamic-preset"
@@ -3380,7 +3426,7 @@
                   ondblclick="changePreset(1)"
                   title="Double-click to edit preset"
                 >
-                  6h
+                  10h
                 </button>
 
                 <!-- Adjustment Button -->
@@ -4232,40 +4278,32 @@
 
             <div class="icon-stack" style="position: relative">
               <button
-                title="Inactivity Detection Settings"
+                title="Application Settings"
                 class="icon-btn sq-btn"
-                id="idle-config-btn"
-                onclick="toggleIdleConfigPopup(event)"
+                id="settings-config-btn"
+                onclick="toggleSettingsPopup(event)"
               >
                 <svg
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
                   fill="none"
+                  stroke="currentColor"
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 >
-                  <!-- Top Solid Active Arc -->
-                  <path d="M4 12a8 8 0 0 1 16 0"></path>
-                  <!-- Bottom Dotted Standby Arc -->
+                  <circle cx="12" cy="12" r="3"></circle>
                   <path
-                    d="M20 12a8 8 0 0 1-16 0"
-                    stroke-dasharray="3 3"
-                    opacity="0.55"
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
                   ></path>
-                  <!-- Clock Hands (Minute hand pointing up, hour hand pointing right) -->
-                  <path d="M12 12V7"></path>
-                  <path d="M12 12h4" opacity="0.6"></path>
-                  <!-- Center pivot dot -->
-                  <circle cx="12" cy="12" r="1.5" fill="currentColor"></circle>
                 </svg>
               </button>
-              <span class="icon-tag" id="idle-tag-display">Idle</span>
+              <span class="icon-tag">Settings</span>
 
               <!-- Dynamic Settings Menu Popup overlay -->
-              <div id="idle-config-popup" class="idle-popup">
+              <div id="settings-config-popup" class="idle-popup">
+                <!-- Inactivity Tracking Section -->
                 <div class="idle-popup-row">
-                  <span class="idle-popup-label">Enable Idle</span>
+                  <span class="idle-popup-label">Enable idle lock</span>
                   <label class="switch">
                     <input
                       type="checkbox"
@@ -4280,7 +4318,7 @@
                   <div class="idle-popup-subrow">
                     <span class="idle-popup-label">Threshold</span>
                     <span class="idle-popup-val" id="idle-val-display"
-                      >30m</span
+                      >60m</span
                     >
                   </div>
                   <input
@@ -4289,11 +4327,32 @@
                     min="5"
                     max="120"
                     step="5"
-                    value="30"
+                    value="60"
                     class="idle-range-input"
                     oninput="onIdleSliderInput(this.value)"
                     onchange="onIdleSliderChange(this.value)"
                   />
+                </div>
+
+                <div class="settings-divider"></div>
+
+                <!-- Background Audio / Wake Lock Section -->
+                <div class="idle-popup-row flex-col">
+                  <div class="idle-popup-subrow">
+                    <span class="idle-popup-label">Keep tab awake</span>
+                    <label class="switch">
+                      <input
+                        type="checkbox"
+                        id="wakelock-toggle"
+                        onchange="onWakeLockToggleChange()"
+                      />
+                      <span class="slider-toggle"></span>
+                    </label>
+                  </div>
+                  <span class="settings-description">
+                    Uses inaudible background audio to prevent the browser from
+                    freezing timers.
+                  </span>
                 </div>
               </div>
             </div>
@@ -4378,7 +4437,7 @@
         const mins =
           state.idleThresholdMinutes !== undefined
             ? state.idleThresholdMinutes
-            : 30;
+            : 60;
         return mins * 60 * 1000;
       }
 
@@ -4399,6 +4458,7 @@
         workAccumulated: 0,
         breakAccumulated: 0,
         currentMode: null,
+        sessionAnchorTime: null,
         loginTimestamp: null,
         activeDate: null,
         idleLock: false,
@@ -4408,8 +4468,9 @@
         lastActivity: null,
         goalNotified: false,
         idleTrackingEnabled: true,
-        idleThresholdMinutes: 30,
+        idleThresholdMinutes: 60,
         idleType: null,
+        wakeLockEnabled: false,
       };
 
       // Shared State Backups and Transaction Variables
@@ -4448,7 +4509,7 @@
       let dailyAnchorMap = new Map(); // DateString -> GoalSeconds
       let filterCache = null; // Memoized result of getFilteredLogs()
       let filterCacheKey = null; // Serialized filter state for cache invalidation
-      let insightsCacheKey = null; // Memoized insights render key
+      let insightsCacheKey = null; // Force invalidate insights cache immediately to prevent race conditions
       let dataVersion = 0; // Incremented on every data mutation; used for cache keys
       const faviconLink = document.querySelector("link[rel='icon']");
       let lastFaviconKey = "";
@@ -4459,6 +4520,38 @@
       function getDotSVG(color, opacity = 1) {
         return `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='${encodeURIComponent(color)}' fill-opacity='${opacity}'/></svg>`;
       }
+
+      // High-performance background timer worker to keep loop active when backgrounded
+      const timerWorkerCode = `
+      let timerId = null;
+      self.onmessage = function(e) {
+        if (e.data === "start") {
+          if (!timerId) {
+            timerId = setInterval(() => {
+              self.postMessage("tick");
+            }, 1000);
+          }
+        } else if (e.data === "stop") {
+          if (timerId) {
+            clearInterval(timerId);
+            timerId = null;
+          }
+        }
+      };
+    `;
+      const timerBlob = new Blob([timerWorkerCode], {
+        type: "application/javascript",
+      });
+      const timerWorkerUrl = URL.createObjectURL(timerBlob);
+      const timerWorker = new Worker(timerWorkerUrl);
+      URL.revokeObjectURL(timerWorkerUrl);
+
+      // Bind Web Worker ticks to the master thread timer loop
+      timerWorker.onmessage = function (e) {
+        if (e.data === "tick") {
+          tick();
+        }
+      };
 
       /*==========================================================================
        * 2. DOM ELEMENT BINDINGS
@@ -4628,40 +4721,50 @@
         try {
           const db = await dbPromise;
           return new Promise((resolve) => {
-            const chunks = {};
-            logsData.forEach((log) => {
-              const dObj = new Date(log.epochMs);
-              const chunkId = `${dObj.getUTCFullYear()}-${String(
-                dObj.getUTCMonth() + 1,
-              ).padStart(2, "0")}`;
-              if (!chunks[chunkId]) chunks[chunkId] = [];
-              chunks[chunkId].push(log);
-            });
-
-            const tx = db.transaction("logs_chunked", "readwrite");
-            const store = tx.objectStore("logs_chunked");
-
-            const reqKeys = store.getAllKeys();
-            reqKeys.onsuccess = () => {
-              const newKeySet = new Set(Object.keys(chunks));
-              reqKeys.result.forEach((k) => {
-                if (!newKeySet.has(k)) store.delete(k);
+            const groupChunks = () => {
+              const chunks = {};
+              logsData.forEach((log) => {
+                const dObj = new Date(log.epochMs);
+                const chunkId = `${dObj.getUTCFullYear()}-${String(
+                  dObj.getUTCMonth() + 1,
+                ).padStart(2, "0")}`;
+                if (!chunks[chunkId]) chunks[chunkId] = [];
+                chunks[chunkId].push(log);
               });
-              newKeySet.forEach((chunkId) =>
-                store.put({ chunkId, data: chunks[chunkId] }),
-              );
-              tx.oncomplete = () => resolve();
-              tx.onerror = (e) => {
-                console.error("IndexedDB write failed:", e);
-                showAppToast("⚠️ Storage write failed — data may not be saved");
+
+              const tx = db.transaction("logs_chunked", "readwrite");
+              const store = tx.objectStore("logs_chunked");
+
+              const reqKeys = store.getAllKeys();
+              reqKeys.onsuccess = () => {
+                const newKeySet = new Set(Object.keys(chunks));
+                reqKeys.result.forEach((k) => {
+                  if (!newKeySet.has(k)) store.delete(k);
+                });
+                newKeySet.forEach((chunkId) =>
+                  store.put({ chunkId, data: chunks[chunkId] }),
+                );
+                tx.oncomplete = () => resolve();
+                tx.onerror = (e) => {
+                  console.error("IDB chunk write failed:", e);
+                  showAppToast(
+                    "⚠️ Storage write failed — data may not be saved",
+                  );
+                  resolve();
+                };
+              };
+              reqKeys.onerror = (e) => {
+                console.error("IndexedDB key read failed:", e);
+                showAppToast("⚠️ Storage read failed — save may be incomplete");
                 resolve();
               };
             };
-            reqKeys.onerror = (e) => {
-              console.error("IndexedDB key read failed:", e);
-              showAppToast("⚠️ Storage read failed — save may be incomplete");
-              resolve();
-            };
+
+            if ("requestIdleCallback" in window) {
+              requestIdleCallback(groupChunks);
+            } else {
+              setTimeout(groupChunks, 0);
+            }
           });
         } catch (e) {
           console.warn("Unable to save logs to IndexedDB:", e);
@@ -4763,6 +4866,12 @@
           }
         } else if (e.data.type === "pong" || e.data.type === "takeover") {
           // Halt and lock down this tab if another instance exists or is forcing ownership
+          if (!isTabConflict) {
+            saveState();
+            if (cachedLogs && cachedLogs.length > 0) {
+              saveLogsToDB(cachedLogs).catch((err) => console.error(err));
+            }
+          }
           isTabConflict = true;
           conflictModal.style.display = "flex";
         }
@@ -4781,6 +4890,7 @@
 
         // Synchronize delta anchor when active tab takes priority
         lastTickTime = Date.now();
+        lastMonotonicTime = performance.now();
 
         // Pull latest database and localStorage states to synchronize this session instantly
         loadState();
@@ -4936,6 +5046,18 @@
         dataVersion++; // Bump version for all derivative caches
         rebuildWeeklyCache();
 
+        // FIX 3: INSTANT SYNCHRONOUS EMERGENCY BACKUP
+        // Saves only the 100 most recent logs synchronously so the browser cannot close
+        // the tab before the data is safely on the drive.
+        try {
+          localStorage.setItem(
+            "production_logs_emergency_backup",
+            JSON.stringify(logs.slice(0, 100)),
+          );
+        } catch (e) {
+          console.warn("Emergency backup write failed", e);
+        }
+
         // Delay database operations until the current thread yields, batching parallel changes
         if (!pendingDBSave) {
           pendingDBSave = Promise.resolve().then(async () => {
@@ -4991,16 +5113,26 @@
        */
       function rebuildWeeklyCache() {
         const logs = getLogs();
-        analyticsWorker.postMessage(logs);
+        // Send a lightweight representation to the worker to reduce postMessage cloning overhead
+        const payload = logs.map((l) => ({
+          epochMs: l.epochMs,
+          date: l.date,
+          dayGoal: l.dayGoal,
+          _idx: l._idx,
+        }));
+        analyticsWorker.postMessage(payload);
       }
 
       // Receive processed arrays back from background thread
       analyticsWorker.onmessage = (e) => {
         const { weeklyGroups, dailyAnchors } = e.data;
+        const logs = getLogs();
 
         weeklyCache.clear();
         for (const [key, val] of Object.entries(weeklyGroups)) {
-          weeklyCache.set(Number(key), val);
+          // Rehydrate the lightweight worker objects back into full DOM logs
+          const hydrated = val.map((v) => logs[v._idx]).filter(Boolean);
+          weeklyCache.set(Number(key), hydrated);
         }
 
         dailyAnchorMap.clear();
@@ -5043,12 +5175,14 @@
           // Hour is normalized to 12 (midday) to prevent +/- 1 hour DST adjustments
           // from shifting the calendar date across the midnight boundary.
           return new Date(
-            parseInt(p.year, 10),
-            parseInt(p.month, 10) - 1,
-            parseInt(p.day, 10),
-            12,
-            0,
-            0,
+            Date.UTC(
+              parseInt(p.year, 10),
+              parseInt(p.month, 10) - 1,
+              parseInt(p.day, 10),
+              12,
+              0,
+              0,
+            ),
           );
         } catch (e) {
           console.error("Error creating PST date object:", e);
@@ -5076,7 +5210,6 @@
         cachedTodayLoggedSeconds = total;
         return total;
       }
-
       // Inactivity tracker helper
       /**
        * Executes updateActivity logic.
@@ -5084,6 +5217,8 @@
       function updateActivity() {
         if (!state.idleLock && !activityThrottle) {
           lastActivity = getTrueTime();
+          state.lastActivity = lastActivity;
+          state.lastHeartbeat = lastActivity;
           activityThrottle = true;
           setTimeout(() => {
             activityThrottle = false;
@@ -5105,7 +5240,15 @@
        * @returns {number} Active work duration.
        */
       function getCurrentWorkSeconds() {
-        return state.workAccumulated;
+        let activeWorkSeconds = 0;
+        if (state.currentMode === "work" && state.sessionAnchorTime) {
+          let refTime = state.idleLock ? state.idleStart : Date.now();
+          activeWorkSeconds = Math.max(
+            0,
+            (refTime - state.sessionAnchorTime) / 1000,
+          );
+        }
+        return state.workAccumulated + activeWorkSeconds;
       }
 
       /**
@@ -5113,7 +5256,15 @@
        * @returns {number} Active break duration.
        */
       function getCurrentBreakSeconds() {
-        return state.breakAccumulated;
+        let activeBreakSeconds = 0;
+        if (state.currentMode === "break" && state.sessionAnchorTime) {
+          let refTime = state.idleLock ? state.idleStart : Date.now();
+          activeBreakSeconds = Math.max(
+            0,
+            (refTime - state.sessionAnchorTime) / 1000,
+          );
+        }
+        return state.breakAccumulated + activeBreakSeconds;
       }
 
       /**
@@ -5121,79 +5272,32 @@
        * Blocks time warp anomalies (VM freezes, machine sleep, NTP changes) using safety limits.
        */
       function accumulateCurrentDelta() {
-        if (isTabConflict) return;
-
-        const nowMs = Date.now();
-        const nowMono = performance.now();
-        const isBackground = document.hidden;
-        const threshold = isBackground ? 75000 : 10000; // Background throttled at 75s, foreground at 10s
-        const deltaMs = nowMs - lastTickTime;
-        const deltaMono = nowMono - lastMonotonicTime;
-
-        // Validate system clock jumps (NTP synchronization)
-        const isClockJump =
-          !isBackground && deltaMs > 10000 && deltaMono < 2000;
-        if (isClockJump) {
-          lastTickTime = nowMs;
-          lastMonotonicTime = nowMono;
+        if (state.currentMode === null || state.idleLock || isTabConflict)
           return;
-        }
 
-        if (deltaMs > 0) {
-          if (deltaMs > threshold) {
-            const isBackgroundThrottling =
-              isBackground && Math.abs(deltaMs - deltaMono) < 5000;
+        const now = Date.now();
+        const monoNow = performance.now();
+        const wallDelta = now - lastTickTime;
+        const monoDelta = monoNow - lastMonotonicTime;
 
-            if (isBackgroundThrottling && deltaMs <= 120000) {
-              if (!state.idleLock && state.currentMode !== null) {
-                const deltaSec = deltaMs / 1000;
-                if (state.currentMode === "work") {
-                  state.workAccumulated += deltaSec;
-                } else if (state.currentMode === "break") {
-                  state.breakAccumulated += deltaSec;
-                }
-              }
-            } else {
-              if (state.currentMode !== null && !state.idleLock) {
-                if (state.idleTrackingEnabled !== false) {
-                  triggerIdleLock(lastTickTime, "system");
-                } else {
-                  // Refined Safety Check: Capping at 4 hours to prevent massive "Ghost Time"
-                  // while remaining accurate for small background gaps.
-                  const systemSleepLimit = 4 * 3600 * 1000;
-                  const safeDeltaMs = Math.min(deltaMs, systemSleepLimit);
-                  const deltaSec = safeDeltaMs / 1000;
-
-                  if (state.currentMode === "work") {
-                    state.workAccumulated += deltaSec;
-                  } else if (state.currentMode === "break") {
-                    state.breakAccumulated += deltaSec;
-                  }
-
-                  if (deltaMs > systemSleepLimit) {
-                    showAppToast(
-                      "Inactivity safety limit applied (capped at 4 hrs)",
-                    );
-                  } else {
-                    showAppToast("Timer adjusted after system wake/resume");
-                  }
-                }
-              }
+        if (Math.abs(wallDelta - monoDelta) > 10000) {
+          if (state.idleTrackingEnabled === false) {
+            if (wallDelta > 14400000) {
+              state.sessionAnchorTime += wallDelta - 14400000;
             }
           } else {
-            // Process standard, trusted, real-world delta slices incrementally
-            if (!state.idleLock && state.currentMode !== null) {
-              const deltaSec = deltaMs / 1000;
-              if (state.currentMode === "work") {
-                state.workAccumulated += deltaSec;
-              } else if (state.currentMode === "break") {
-                state.breakAccumulated += deltaSec;
-              }
-            }
+            triggerIdleLock(lastActivity, "system");
+            return;
           }
         }
-        lastTickTime = nowMs;
-        lastMonotonicTime = nowMono;
+
+        lastTickTime = now;
+        lastMonotonicTime = monoNow;
+
+        // Real-time anchor calculation is handled dynamically in getCurrentWorkSeconds
+        renderTimersOnly();
+
+        saveState();
       }
 
       /**
@@ -5202,9 +5306,18 @@
        */
       function switchMode(mode) {
         if (state.currentMode === mode) return;
-        accumulateCurrentDelta();
 
-        // Dismisses the undo window to prevent state collisions if a new session starts
+        const now = Date.now();
+
+        if (state.sessionAnchorTime && state.currentMode) {
+          const elapsedSeconds = (now - state.sessionAnchorTime) / 1000;
+          if (state.currentMode === "work") {
+            state.workAccumulated += elapsedSeconds;
+          } else if (state.currentMode === "break") {
+            state.breakAccumulated += elapsedSeconds;
+          }
+        }
+
         if (lastStateBackup) {
           lastStateBackup = null;
           const toast = document.getElementById("undo-toast");
@@ -5212,10 +5325,17 @@
         }
 
         state.currentMode = mode;
-        const now = Date.now();
-        if (mode === "work") {
-          if (!state.loginTimestamp) state.loginTimestamp = now;
+
+        if (mode === "work" || mode === "break") {
+          state.sessionAnchorTime = now;
+          state.lastHeartbeat = now;
+          if (mode === "work" && !state.loginTimestamp) {
+            state.loginTimestamp = now;
+          }
+        } else {
+          state.sessionAnchorTime = null;
         }
+
         saveState();
         renderStaticUI();
         renderTimersOnly();
@@ -5428,9 +5548,14 @@
         const isVacationDate = (dStr) =>
           leaveDates.some((l) => (typeof l === "string" ? l : l.date) === dStr);
 
+        // =========================================================================
+        // ARCHITECTURE NOTE: The weekly target is strictly hardcoded to 40 hours (144000s).
+        // Weekday (Mon-Fri) logged hours are summed here, completely decoupled from the active UI daily goal,
+        // which prevents changing the daily goal from altering the master weekly 40-hour requirement.
+        // =========================================================================
+
         let totalW_MonFri = 0;
-        let dynamicWeeklyGoalSec = 0;
-        const liveGoalSec = getGoalSeconds();
+        const dynamicWeeklyGoalSec = 40 * 3600; // Hardcoded to exactly 40 Hours
         const reusableDate = new Date(mondayUTC);
 
         for (let i = 0; i < 5; i++) {
@@ -5446,12 +5571,6 @@
 
           const dayW = logsByDate[dateStr] ? logsByDate[dateStr].w : 0;
           totalW_MonFri += dayW;
-
-          if (!isVacationDate(dateStr)) {
-            const storedGoal = dailyAnchorMap.get(dateStr);
-            dynamicWeeklyGoalSec +=
-              storedGoal && storedGoal > 0 ? storedGoal : liveGoalSec;
-          }
         }
 
         totalW_MonFri += getCurrentWorkSeconds();
@@ -5505,14 +5624,15 @@
 
               if (activeDaysRemaining > 0) {
                 const paceSec = remainingSec / activeDaysRemaining;
-                const paceH = Math.floor(paceSec / 3600);
-                const paceM = Math.round((paceSec % 3600) / 60);
-                setText(weekMsg, `Pace Needed: ${paceH}h ${paceM}m / day`);
+                const paceMinsTotal = Math.round(paceSec / 60);
+                const paceH = Math.floor(paceMinsTotal / 60);
+                const paceM = paceMinsTotal % 60;
+                setText(weekMsg, `Pace Required: ${paceH}h ${paceM}m / Day`);
               } else {
-                setText(weekMsg, "Remaining days are leaves.");
+                setText(weekMsg, "Pace Required: — / Day");
               }
             } else {
-              setText(weekMsg, "Weekend: Goal incomplete.");
+              setText(weekMsg, "Pace Required: — / Day");
             }
             weekMsg.style.color = "var(--text-muted)";
           } else {
@@ -5539,6 +5659,15 @@
        */
       function updateProgress(workSeconds) {
         const todayStr = getPSTDate();
+
+        // =========================================================================
+        // REAL-TIME DASHBOARD PROGRESS ARCHITECTURE:
+        // Updates today's active progress rail, ETA, and progress metrics.
+        // - Today's progress scales dynamically with the current UI daily goal (uiGoalSec)
+        //   or today's anchored goal (anchorGoalSec) if a shift was already logged.
+        // - Triggers the celebratory '#goal-toast' only when today's combined work
+        //   fully meets today's target, completely independent of the weekly goal.
+        // =========================================================================
 
         const uiGoalSec = getGoalSeconds();
         const anchorGoalSec = dailyAnchorMap.get(todayStr) || uiGoalSec;
@@ -5787,10 +5916,10 @@
         accumulateCurrentDelta();
         const workSeconds = pendingSubmitData
           ? pendingSubmitData.workSec
-          : Math.floor(state.workAccumulated);
+          : Math.floor(getCurrentWorkSeconds());
         const breakSeconds = pendingSubmitData
           ? pendingSubmitData.breakSec
-          : Math.floor(state.breakAccumulated);
+          : Math.floor(getCurrentBreakSeconds());
         const loginTs = pendingSubmitData
           ? pendingSubmitData.loginTs
           : state.loginTimestamp;
@@ -5885,34 +6014,23 @@
        * Pauses active timers and locks application under Inactivity mode if thresholds pass.
        */
       function triggerIdleLock(timeOfIdle, type = "inactivity") {
-        // Calculate the overlap (the duration that was actively accumulated but should have been idle)
-        const deltaMs = timeOfIdle - lastTickTime;
-        let overlapSec = 0;
-
-        if (deltaMs > 0) {
-          // Forward jump (standard wake-up gap) - accumulate it up to the moment of sleep
-          if (!state.idleLock && state.currentMode !== null) {
-            const deltaSec = deltaMs / 1000;
-            if (state.currentMode === "work") {
-              state.workAccumulated += deltaSec;
-            } else if (state.currentMode === "break") {
-              state.breakAccumulated += deltaSec;
-            }
-          }
-        } else if (deltaMs < 0) {
-          // Backward jump (inactivity timeout) - record how much overlapping active time was accumulated
-          if (!state.idleLock && state.currentMode !== null) {
-            overlapSec = Math.abs(deltaMs) / 1000;
+        if (state.sessionAnchorTime && state.lastHeartbeat) {
+          const elapsedBeforeIdle =
+            (state.lastHeartbeat - state.sessionAnchorTime) / 1000;
+          if (state.currentMode === "work") {
+            state.workAccumulated += Math.max(0, elapsedBeforeIdle);
+          } else if (state.currentMode === "break") {
+            state.breakAccumulated += Math.max(0, elapsedBeforeIdle);
           }
         }
 
         state.preIdleMode = state.currentMode;
-        state.idleOverlapSec = overlapSec;
+        state.idleOverlapSec = 0;
         state.currentMode = null;
-        state.idleStart = timeOfIdle;
+        state.sessionAnchorTime = null;
+        state.idleStart = state.lastHeartbeat || timeOfIdle;
         state.idleLock = true;
         state.idleType = type;
-        lastTickTime = timeOfIdle;
         saveState();
         renderStaticUI();
         renderTimersOnly(new Date(timeOfIdle));
@@ -5971,44 +6089,23 @@
       function resolveIdle(choice) {
         const now = Date.now();
         const totalIdleSec = (now - state.idleStart) / 1000;
-        const overlapSec = state.idleOverlapSec || 0;
-        const preMode = state.preIdleMode;
 
         if (choice === "work") {
-          if (preMode === "work") {
-            // It was already accumulated as work up to the sleep/idle freeze.
-            // Add only the remaining duration that was spent in the idle state.
-            state.workAccumulated += totalIdleSec - overlapSec;
-          } else if (preMode === "break") {
-            // It was accumulated as break. Deduct the overlap from break, add full duration to work.
-            state.breakAccumulated = Math.max(
-              0,
-              state.breakAccumulated - overlapSec,
-            );
-            state.workAccumulated += totalIdleSec;
-          } else {
-            state.workAccumulated += totalIdleSec;
-          }
-
+          state.workAccumulated += totalIdleSec;
           if (!state.loginTimestamp) {
             state.loginTimestamp = now - totalIdleSec * 1000;
           }
         } else if (choice === "break") {
-          if (preMode === "break") {
-            // It was already accumulated as break up to the sleep/idle freeze.
-            // Add only the remaining duration that was spent in the idle state.
-            state.breakAccumulated += totalIdleSec - overlapSec;
-          } else if (preMode === "work") {
-            // It was accumulated as work. Deduct the overlap from work, add full duration to break.
-            state.workAccumulated = Math.max(
-              0,
-              state.workAccumulated - overlapSec,
-            );
-            state.breakAccumulated += totalIdleSec;
-          } else {
-            state.breakAccumulated += totalIdleSec;
-          }
+          state.breakAccumulated += totalIdleSec;
         }
+
+        // CAPTURE THE MODE BEFORE WIPING IT:
+        const targetMode =
+          choice === "discard"
+            ? state.preIdleMode
+            : choice === "break"
+              ? "break"
+              : "work";
 
         state.idleLock = false;
         state.idleStart = null;
@@ -6016,13 +6113,13 @@
         state.idleOverlapSec = 0;
         lastActivity = now;
         state.lastActivity = now;
-        lastTickTime = now; // Recalibrate high-frequency accumulation anchor
+        lastTickTime = Date.now();
+        lastMonotonicTime = performance.now();
         saveState();
         document.getElementById("idle-modal").style.display = "none";
 
-        // Resume into the mode the user chose — work if they said it was work time,
-        // break if they said it was break time. This preserves pre-idle intent.
-        switchMode(choice === "break" ? "break" : "work");
+        // USE THE CAPTURED MODE
+        switchMode(targetMode);
       }
 
       /**
@@ -6031,6 +6128,7 @@
       function resetSession() {
         const previousIdleEnabled = state.idleTrackingEnabled;
         const previousIdleThreshold = state.idleThresholdMinutes;
+        const previousWakeLockEnabled = state.wakeLockEnabled;
 
         state = {
           workAccumulated: 0,
@@ -6048,7 +6146,11 @@
           idleTrackingEnabled:
             previousIdleEnabled !== undefined ? previousIdleEnabled : true,
           idleThresholdMinutes:
-            previousIdleThreshold !== undefined ? previousIdleThreshold : 30,
+            previousIdleThreshold !== undefined ? previousIdleThreshold : 60,
+          wakeLockEnabled:
+            previousWakeLockEnabled !== undefined
+              ? previousWakeLockEnabled
+              : false,
         };
         lastActivity = Date.now();
         lastTickTime = Date.now(); // Recalibrate high-frequency accumulation anchor
@@ -6081,7 +6183,7 @@
         const isWeekend = dayNum === 0 || dayNum === 6;
 
         const weekendBadge = isWeekend
-          ? `<span style="font-size: 0.5rem; color: var(--text-muted); border: 1px solid var(--border-main); padding: 1px 4px; border-radius: 4px; margin-left: 8px; font-weight: 400; opacity: 0.7;">Weekend</span>`
+          ? `<span style="font-size: 0.55rem; color: var(--accent-blue); border: 1px solid rgba(124, 180, 232, 0.3); background: rgba(124, 180, 232, 0.1); padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: 600; vertical-align: middle;">Weekend</span>`
           : "";
 
         const rawDeltaSec = Math.abs(
@@ -6104,8 +6206,8 @@
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-1);">
             <div class="font-mono" style="display: flex; gap: var(--space-3); font-size: var(--text-xs);">
-                <span style="display: inline-block; min-width: 75px;"><span style="color: var(--accent-work); font-weight: bold;">W:</span> ${formatFriendlyDuration(log.workSec)}</span>
-                <span style="display: inline-block; min-width: 65px;"><span style="color: var(--accent-break); font-weight: bold;">B:</span> ${formatFriendlyDuration(log.breakSec)}</span>
+                <span style="display: inline-flex; align-items: center; min-width: 75px;"><span style="display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:4px; background:rgba(74, 222, 128, 0.1); border:1px solid rgba(74, 222, 128, 0.3); color:var(--accent-work); font-weight:700; font-size:0.6rem; margin-right:4px;">W</span> ${formatFriendlyDuration(log.workSec)}</span>
+                <span style="display: inline-flex; align-items: center; min-width: 65px;"><span style="display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:4px; background:rgba(248, 113, 113, 0.1); border:1px solid rgba(248, 113, 113, 0.3); color:var(--accent-break); font-weight:700; font-size:0.6rem; margin-right:4px;">B</span> ${formatFriendlyDuration(log.breakSec)}</span>
             </div>
             <div class="icon-actions">
                 <button class="${noteIconClass}" ${noteBtnAttr}>${SVGs.note}</button>
@@ -6815,6 +6917,24 @@
        * 14. DATA MIGRATIONS & BACKUP UTILITIES (CSV/JSON/TEXT)
        * =========================================================================*/
 
+      function parseTimeToMinutes(timeStr) {
+        if (
+          !timeStr ||
+          timeStr === "Manual" ||
+          timeStr === "Entry" ||
+          timeStr === "—"
+        )
+          return null;
+        const match = timeStr.match(/^(\d{2}):(\d{2})\s*(AM|PM)$/i);
+        if (!match) return null;
+        let hours = parseInt(match[1], 10);
+        const minutes = parseInt(match[2], 10);
+        const ampm = match[3].toUpperCase();
+        if (ampm === "PM" && hours < 12) hours += 12;
+        if (ampm === "AM" && hours === 12) hours = 0;
+        return hours * 60 + minutes;
+      }
+
       /**
        * Compiles weekly data aggregates.
        */
@@ -6839,12 +6959,55 @@
         for (let i = 0; i < weeklyLogs.length; i++) {
           const l = weeklyLogs[i];
           if (!logsByDate[l.displayDate]) {
-            logsByDate[l.displayDate] = { w: 0, b: 0, goal: 0 };
+            logsByDate[l.displayDate] = {
+              w: 0,
+              b: 0,
+              goal: 0,
+              earliestLoginMin: null,
+              latestLogoutMin: null,
+              login: "—",
+              logout: "—",
+            };
           }
           logsByDate[l.displayDate].w += l.workSec;
           logsByDate[l.displayDate].b += l.breakSec;
           if (l.dayGoal && logsByDate[l.displayDate].goal === 0) {
             logsByDate[l.displayDate].goal = l.dayGoal;
+          }
+
+          const loginMin = parseTimeToMinutes(l.login);
+          const logoutMin = parseTimeToMinutes(l.logout);
+
+          if (loginMin !== null) {
+            if (
+              logsByDate[l.displayDate].earliestLoginMin === null ||
+              loginMin < logsByDate[l.displayDate].earliestLoginMin
+            ) {
+              logsByDate[l.displayDate].earliestLoginMin = loginMin;
+              logsByDate[l.displayDate].login = l.login;
+            }
+          } else if (
+            l.login &&
+            l.login !== "—" &&
+            logsByDate[l.displayDate].login === "—"
+          ) {
+            logsByDate[l.displayDate].login = l.login;
+          }
+
+          if (logoutMin !== null) {
+            if (
+              logsByDate[l.displayDate].latestLogoutMin === null ||
+              logoutMin > logsByDate[l.displayDate].latestLogoutMin
+            ) {
+              logsByDate[l.displayDate].latestLogoutMin = logoutMin;
+              logsByDate[l.displayDate].logout = l.logout;
+            }
+          } else if (
+            l.logout &&
+            l.logout !== "—" &&
+            logsByDate[l.displayDate].logout === "—"
+          ) {
+            logsByDate[l.displayDate].logout = l.logout;
           }
         }
 
@@ -6893,9 +7056,15 @@
         const isVacationDate = (dStr) =>
           leaveDates.some((l) => (typeof l === "string" ? l : l.date) === dStr);
 
+        // =========================================================================
+        // ARCHITECTURE NOTE: The weekly goal remains hardcoded to 40 hours (dynamicWeeklyGoalSec = 40 * 3600).
+        // Mon-Fri hours are accumulated into the weekly total, while Saturday/Sunday (indices 6/0) are
+        // excluded from weekly progress but drawn in breakdown rows with their respective anchored/fallback goals.
+        // =========================================================================
+
         let totalW_MonFri = 0;
         let totalB_AllWeek = 0;
-        let dynamicWeeklyGoalSec = 0;
+        const dynamicWeeklyGoalSec = 40 * 3600; // Hardcoded to exactly 40 Hours
         let breakdownHTML = "";
         const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         const liveGoalSec = getGoalSeconds();
@@ -6915,29 +7084,34 @@
             "0",
           )}/${reusableDate.getUTCFullYear().toString().slice(-2)}`;
 
-          const dayW = logsByDate[dateStr] ? logsByDate[dateStr].w : 0;
-          const dayB = logsByDate[dateStr] ? logsByDate[dateStr].b : 0;
-          const isVacation = isVacationDate(dateStr);
-
-          // Track Mon-Fri work and dynamic goals
-          if (dayOfWeekIndex >= 1 && dayOfWeekIndex <= 5) {
-            totalW_MonFri += dayW;
-            if (!isVacation) {
-              const storedGoal = dailyAnchorMap.get(dateStr);
-              dynamicWeeklyGoalSec +=
-                storedGoal && storedGoal > 0 ? storedGoal : liveGoalSec;
-            }
-          }
-          totalB_AllWeek += dayB;
-
+          const displayDateNoYear = dateStr.slice(0, 5);
           const isToday = dateStr === todayStr;
           const isWeekend = dayOfWeekIndex === 0 || dayOfWeekIndex === 6;
+
+          let dayW = logsByDate[dateStr] ? logsByDate[dateStr].w : 0;
+          let dayB = logsByDate[dateStr] ? logsByDate[dateStr].b : 0;
+          const isVacation = isVacationDate(dateStr);
+
+          if (isToday) {
+            dayW += getCurrentWorkSeconds();
+            dayB += getCurrentBreakSeconds();
+          }
+
+          // Track Mon-Fri work
+          if (dayOfWeekIndex >= 1 && dayOfWeekIndex <= 5) {
+            totalW_MonFri += dayW;
+          }
+          totalB_AllWeek += dayB;
 
           const rowStyle = `border-left: 3px solid ${
             isToday ? "var(--accent-blue)" : "transparent"
           }; background: ${
-            isToday ? "rgba(96, 165, 250, 0.08)" : "transparent"
+            isToday ? "rgba(124, 180, 232, 0.08)" : "transparent"
           }; border-radius: 8px; margin-bottom: 2px;`;
+
+          const weekendBadge = isWeekend
+            ? `<span style="font-size: 0.55rem; color: var(--accent-blue); border: 1px solid rgba(124, 180, 232, 0.3); background: rgba(124, 180, 232, 0.1); padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: 600; vertical-align: middle;">Weekend</span>`
+            : "";
 
           if (isVacation) {
             const leaveRecord = leaveDates.find(
@@ -6948,50 +7122,127 @@
                 ? `${leaveRecord.type} Leave`
                 : "Leave";
 
-            breakdownHTML += `
-            <div class="breakdown-row" style="padding: 10px 12px; ${rowStyle}">
-              <div style="display: flex; align-items: center;">
-                <span style="font-weight: ${isToday ? "700" : "400"}; font-size: 0.8rem;">
-                  ${dayNames[dayOfWeekIndex]} <span style="opacity: 0.5;">(${dateStr})</span>
-                </span>
-                <span style="font-size: 0.55rem; color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); padding: 2px 6px; border-radius: 4px; margin-left: 8px;">${leaveLabel}</span>
-              </div>
-              <div class="font-mono stats-alignment-wrapper" style="font-size: 0.75rem; color: var(--text-main);">
-                 <div class="stat-column work-col"><span style="color:var(--accent-work); font-weight:bold;">W:</span> —</div>
-                 <div class="stat-column break-col"><span style="color:var(--accent-break); font-weight:bold;">B:</span> —</div>
-              </div>
-            </div>`;
-          } else {
-            let statusBadge = "";
-            if (dayW > 0 || dayB > 0) {
-              const anchorGoal = dailyAnchorMap.get(dateStr) || liveGoalSec;
-              const isOver = dayW >= anchorGoal;
-              const badgeColor = isOver
-                ? "var(--accent-work)"
-                : "var(--accent-warning)";
-              statusBadge = `<span style="border: 1px solid ${badgeColor}; color: ${badgeColor}; border-radius: 4px; padding: 1px 3px; font-size: 0.5rem; margin-left: 5px;">${
-                isOver ? "O" : "U"
-              }</span>`;
-            }
+            const leaveBadge = `<span style="font-size: 0.55rem; color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); background: rgba(74, 222, 128, 0.1); padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: 600; vertical-align: middle;">${leaveLabel}</span>`;
 
-            if (!isWeekend || dayW > 0 || dayB > 0) {
-              breakdownHTML += `
-              <div class="breakdown-row" style="padding: 10px 12px; ${rowStyle}">
-                <div style="display: flex; align-items: center;">
+            breakdownHTML += `
+          <div class="breakdown-row" style="${rowStyle}">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span style="font-weight: ${isToday ? "700" : "400"}; font-size: 0.8rem;">
+                ${dayNames[dayOfWeekIndex]} <span style="opacity: 0.5;">(${displayDateNoYear})</span>${weekendBadge}${leaveBadge}
+              </span>
+              <div class="font-mono stats-alignment-wrapper" style="font-size: 0.75rem; color: var(--text-main); display: flex; gap: 12px;">
+                 <div class="stat-column work-col" style="display:flex; align-items:center;"><span style="display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:4px; background:rgba(74, 222, 128, 0.15); border:1px solid rgba(74, 222, 128, 0.3); color:var(--accent-work); font-weight:700; font-size:0.65rem; margin-right:6px;">W</span> —</div>
+                 <div class="stat-column break-col" style="display:flex; align-items:center;"><span style="display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:4px; background:rgba(248, 113, 113, 0.15); border:1px solid rgba(248, 113, 113, 0.3); color:var(--accent-break); font-weight:700; font-size:0.65rem; margin-right:6px;">B</span> —</div>
+              </div>
+            </div>
+          </div>`;
+          } else {
+            const isEmptyDay =
+              dayW === 0 && dayB === 0 && (!isToday || !state.loginTimestamp);
+
+            if (isEmptyDay) {
+              if (!isWeekend) {
+                breakdownHTML += `
+              <div class="breakdown-row" style="${rowStyle}">
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                   <span style="font-weight: ${isToday ? "700" : "400"}; font-size: 0.8rem;">
-                    ${dayNames[dayOfWeekIndex]} <span style="opacity: 0.5;">(${dateStr})</span>
+                    ${dayNames[dayOfWeekIndex]} <span style="opacity: 0.5;">(${displayDateNoYear})</span>${weekendBadge}
                   </span>
-                  ${statusBadge}
-                </div>
-                <div class="font-mono stats-alignment-wrapper" style="font-size: 0.75rem; color: var(--text-main);">
-                  <div class="stat-column work-col">
-                    <span style="color:var(--accent-work); font-weight:bold;">W:</span> ${formatFriendlyDuration(dayW)}
-                  </div>
-                  <div class="stat-column break-col">
-                    <span style="color:var(--accent-break); font-weight:bold;">B:</span> ${formatFriendlyDuration(dayB)}
+                  <div class="font-mono stats-alignment-wrapper" style="font-size: 0.75rem; color: var(--text-main); display: flex; gap: 12px;">
+                     <div class="stat-column work-col" style="display:flex; align-items:center;"><span style="display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:4px; background:rgba(74, 222, 128, 0.15); border:1px solid rgba(74, 222, 128, 0.3); color:var(--accent-work); font-weight:700; font-size:0.65rem; margin-right:6px;">W</span> —</div>
+                     <div class="stat-column break-col" style="display:flex; align-items:center;"><span style="display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:4px; background:rgba(248, 113, 113, 0.15); border:1px solid rgba(248, 113, 113, 0.3); color:var(--accent-break); font-weight:700; font-size:0.65rem; margin-right:6px;">B</span> —</div>
                   </div>
                 </div>
               </div>`;
+              }
+            } else {
+              const dayLogs = logsByDate[dateStr];
+              let loginStr = "—";
+              let logoutStr = "—";
+
+              if (dayLogs) {
+                loginStr = dayLogs.login || "—";
+                logoutStr = dayLogs.logout || "—";
+              }
+
+              if (isToday && state.loginTimestamp) {
+                const todayLoginStr = loginFormatter.format(
+                  new Date(state.loginTimestamp),
+                );
+                if (loginStr === "—") {
+                  loginStr = todayLoginStr;
+                }
+                if (state.currentMode === "work") {
+                  logoutStr = "Active";
+                } else if (state.currentMode === "break") {
+                  logoutStr = "Break";
+                } else {
+                  logoutStr = "Paused";
+                }
+              }
+
+              const focusVal =
+                dayW + dayB > 0
+                  ? Math.min(100, Math.round((dayW / (dayW + dayB)) * 100))
+                  : 0;
+              const focusText = focusVal > 0 ? `${focusVal}%` : `—`;
+
+              // =========================================================================
+              // SEGMENT BAR & GOAL RESOLUTION:
+              // Determines the target for each weekday segment bar:
+              // 1. Anchored Goal: If a shift is already logged for this date, uses the target
+              //    active at the time of submission (preserved in dailyAnchorMap).
+              // 2. Fallback Goal: If no shift is logged (today/future), falls back to the
+              //    active UI daily goal (liveGoalSec).
+              // =========================================================================
+
+              const anchorGoal = dailyAnchorMap.get(dateStr) || liveGoalSec;
+              const diffSec = dayW - anchorGoal;
+              const isOver = diffSec >= 0;
+              const absDiffSec = Math.abs(diffSec);
+              const diffMinsTotal = Math.round(absDiffSec / 60);
+              const diffH = Math.floor(diffMinsTotal / 60);
+              const diffM = diffMinsTotal % 60;
+              const varianceTime = `${diffH}h ${diffM}m`;
+
+              const ouLetter = isOver ? "O" : "U";
+              const ouBg = isOver
+                ? "rgba(74, 222, 128, 0.15)"
+                : "rgba(245, 158, 11, 0.15)";
+              const ouBorder = isOver
+                ? "1px solid rgba(74, 222, 128, 0.3)"
+                : "1px solid rgba(245, 158, 11, 0.3)";
+              const ouColorText = isOver
+                ? "var(--accent-work)"
+                : "var(--accent-warning)";
+
+              breakdownHTML += `
+            <div class="breakdown-row" style="${rowStyle}">
+              <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <span style="font-weight: ${isToday ? "700" : "400"}; font-size: 0.8rem;">
+                  ${dayNames[dayOfWeekIndex]} <span style="opacity: 0.5;">(${displayDateNoYear})</span>${weekendBadge}
+                </span>
+                <div class="font-mono stats-alignment-wrapper" style="font-size: 0.75rem; color: var(--text-main); display: flex; gap: 12px;">
+                  <div class="stat-column work-col" style="display:flex; align-items:center;">
+                    <span style="display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:4px; background:rgba(74, 222, 128, 0.15); border:1px solid rgba(74, 222, 128, 0.3); color:var(--accent-work); font-weight:700; font-size:0.65rem; margin-right:6px;">W</span> ${formatFriendlyDuration(dayW)}
+                  </div>
+                  <div class="stat-column break-col" style="display:flex; align-items:center;">
+                    <span style="display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:4px; background:rgba(248, 113, 113, 0.15); border:1px solid rgba(248, 113, 113, 0.3); color:var(--accent-break); font-weight:700; font-size:0.65rem; margin-right:6px;">B</span> ${formatFriendlyDuration(dayB)}
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">
+                <span>${loginStr} - ${logoutStr}</span>
+                <div class="font-mono stats-alignment-wrapper" style="font-size: 0.7rem; color: var(--text-muted); display: flex; gap: 12px;">
+                  <div class="stat-column work-col" style="display:flex; align-items:center;">
+                    <span style="display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:4px; background:${ouBg}; border:${ouBorder}; color:${ouColorText}; font-weight:700; font-size:0.65rem; margin-right:6px;">${ouLetter}</span><span style="font-weight: 600; color: ${ouColorText};">${varianceTime}</span>
+                  </div>
+                  <div class="stat-column break-col" style="display:flex; align-items:center;">
+                    <span style="display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:4px; background:rgba(124, 180, 232, 0.15); border:1px solid rgba(124, 180, 232, 0.3); color:var(--accent-blue); font-weight:700; font-size:0.65rem; margin-right:6px;">F</span><span style="font-weight: 600; color: var(--text-muted);">${focusText}</span>
+                  </div>
+                </div>
+              </div>
+            </div>`;
             }
           }
         }
@@ -7033,6 +7284,15 @@
           const segment = DOM.progressSegments[i];
 
           if (segment) {
+            // =========================================================================
+            // LEAVE & WEEKEND BREAKDOWN RULES:
+            // 1. Leave Days: Marked with a dashed diagonal pattern (is-leave) instead of
+            //    evaluating goals or expecting hours.
+            // 2. Weekend Days (Sat/Sun): Rendered in this breakdown list for reference,
+            //    showing work/break totals and daily variances, but strictly excluded
+            //    from the top-level 40-hour totals.
+            // =========================================================================
+
             if (isVacation) {
               segment.classList.add("is-leave");
             } else {
@@ -7051,9 +7311,7 @@
           }
         }
 
-        if (weekStartMs === todayWeekStartMs)
-          totalW_MonFri += getCurrentWorkSeconds();
-
+        // Active work is already accumulated into totalW_MonFri inside the day loop
         const totalPercent =
           dynamicWeeklyGoalSec > 0
             ? Math.min((totalW_MonFri / dynamicWeeklyGoalSec) * 100, 100)
@@ -7073,22 +7331,46 @@
           else progressCard.classList.remove("goal-reached");
         }
 
+        // =========================================================================
+        // WEEKLY PACE HELPER:
+        // Calculates remaining seconds against the hardcoded 40-hour limit.
+        // Divides the remaining seconds by the active weekdays remaining (Monday–Friday)
+        // to calculate the daily work hours required to meet the 40-hour weekly target.
+        // =========================================================================
+
         if (weekMsg) {
-          const remainingSec = Math.max(
-            0,
-            dynamicWeeklyGoalSec - totalW_MonFri,
-          );
-          if (remainingSec > 0) {
-            weekMsg.textContent = `Remaining: ${formatFriendlyDuration(remainingSec, "0h")}`;
+          if (weekStartMs < todayWeekStartMs) {
+            // Past Week
+            if (totalW_MonFri >= dynamicWeeklyGoalSec) {
+              weekMsg.textContent = "Week ended: Goal Achieved";
+              weekMsg.style.color = "var(--accent-work)";
+            } else {
+              weekMsg.textContent = "Week ended: Goal Incomplete";
+              weekMsg.style.color = "var(--accent-warning)";
+            }
+          } else if (weekStartMs > todayWeekStartMs) {
+            // Future Week
+            weekMsg.textContent = "Upcoming Week";
             weekMsg.style.color = "var(--text-muted)";
           } else {
-            weekMsg.textContent = "Weekly Goal Achieved!";
-            weekMsg.style.color = "var(--accent-work)";
+            // Current Week fallback
+            if (totalW_MonFri >= dynamicWeeklyGoalSec) {
+              weekMsg.textContent = "Weekly Goal Achieved!";
+              weekMsg.style.color = "var(--accent-work)";
+            } else {
+              weekMsg.textContent = "Pace Required: Calculating...";
+              weekMsg.style.color = "var(--text-muted)";
+            }
           }
         }
 
         DOM.weeklyBreakdown.innerHTML = breakdownHTML;
         setText(DOM.weeklyBreak, formatFriendlyDuration(totalB_AllWeek, "0m"));
+
+        // Instantly trigger live calculations if viewing the current active week
+        if (isCurrentWeek) {
+          updateLiveWeeklySummary(true);
+        }
       }
 
       /*==========================================================================
@@ -7504,11 +7786,12 @@
         }
 
         if (state.activeDate !== currentDatePST) {
-          if (state.currentMode === null && state.workAccumulated < 60) {
+          const currentWork = getCurrentWorkSeconds();
+          if (state.currentMode === null && currentWork < 60) {
             // Paused with negligible work — just roll the date forward cleanly
             state.activeDate = currentDatePST;
             saveState();
-          } else if (state.workAccumulated > 60) {
+          } else if (currentWork >= 60) {
             // Active session or paused with real work accumulated — auto-submit
             // under the previous day's date, then reset for the new day
             const activeMode = state.currentMode;
@@ -7522,10 +7805,16 @@
               state.currentMode = activeMode;
               state.loginTimestamp = getTrueTime();
               state.activeDate = currentDatePST;
+              state.sessionAnchorTime = getTrueTime();
               saveState();
               renderStaticUI();
               renderTimersOnly();
             }
+
+            showSyncToast(
+              "Midnight rollover: Yesterday's shift auto-saved.",
+              true,
+            );
           }
           // If workAccumulated <= 60 and mode is active (just started at midnight),
           // silently roll the date forward to avoid submitting a ghost entry
@@ -7539,13 +7828,10 @@
       let saveTicks = 0;
 
       /**
-       * Central master timing execution cycle running every single second.
+       * Central master timing execution cycle driven by our dedicated Web Worker thread.
        */
       function tick() {
-        if (isTabConflict) {
-          setTimeout(tick, 1000);
-          return;
-        }
+        if (isTabConflict) return;
 
         accumulateCurrentDelta();
 
@@ -7599,20 +7885,44 @@
 
         checkMidnightReset(now);
 
-        // Writes to storage are scaled to 60-second ticks to minimize synchronous localStorage write delays, saving every tick in the background
+        // Writes to storage are scaled to 60-second ticks to minimize synchronous localStorage write delays
         if (++saveTicks % 60 === 0) {
           saveState();
         }
-
-        setTimeout(tick, 1000 - (nowMs % 1000));
       }
 
-      // Automatically saves metrics on tab hiding or page exits to prevent data loss
+      // Upgraded Visibility Change handler containing robust background idle catch-ups
       document.addEventListener("visibilitychange", () => {
+        const now = Date.now();
         if (document.hidden) {
+          state.tabHiddenAt = now;
           saveState();
         } else {
+          // Evaluate background activity gap to prevent leakage
+          if (
+            state.tabHiddenAt &&
+            state.currentMode !== null &&
+            state.idleTrackingEnabled !== false &&
+            !state.idleLock
+          ) {
+            const elapsedBackgroundMs = now - state.tabHiddenAt;
+
+            // Check if the user crossed the idle threshold entirely while away
+            if (now - lastActivity > getIdleThresholdMs()) {
+              // Retroactively lock out active accumulation back to their last action timestamp
+              triggerIdleLock(lastActivity, "inactivity");
+            }
+          }
+
+          // Clean up the visibility helper variable
+          delete state.tabHiddenAt;
+
+          // Calibrate timing anchors instantly to prevent delta accumulation spikes
+          lastTickTime = now;
+          lastMonotonicTime = performance.now();
+
           renderTimersOnly();
+          updateLiveWeeklySummary(true);
         }
       });
 
@@ -7736,36 +8046,36 @@
       /*==========================================================================
        * 19. MANUAL LOG INSERTION UTILITIES
        * =========================================================================*/
-      let activeIdleCloseHandler = null;
+      let activeSettingsCloseHandler = null;
 
-      window.toggleIdleConfigPopup = function (e) {
+      window.toggleSettingsPopup = function (e) {
         e.stopPropagation();
-        const popup = document.getElementById("idle-config-popup");
+        const popup = document.getElementById("settings-config-popup");
         if (!popup) return;
 
         const isShowing = popup.classList.contains("show");
         if (isShowing) {
           popup.classList.remove("show");
-          if (activeIdleCloseHandler) {
-            window.removeEventListener("click", activeIdleCloseHandler);
-            activeIdleCloseHandler = null;
+          if (activeSettingsCloseHandler) {
+            window.removeEventListener("click", activeSettingsCloseHandler);
+            activeSettingsCloseHandler = null;
           }
         } else {
           popup.classList.add("show");
-          syncIdleConfigUI();
+          syncSettingsUI();
 
-          if (activeIdleCloseHandler) {
-            window.removeEventListener("click", activeIdleCloseHandler);
+          if (activeSettingsCloseHandler) {
+            window.removeEventListener("click", activeSettingsCloseHandler);
           }
 
-          activeIdleCloseHandler = (event) => {
+          activeSettingsCloseHandler = (event) => {
             if (!popup.contains(event.target)) {
               popup.classList.remove("show");
-              window.removeEventListener("click", activeIdleCloseHandler);
-              activeIdleCloseHandler = null;
+              window.removeEventListener("click", activeSettingsCloseHandler);
+              activeSettingsCloseHandler = null;
             }
           };
-          window.addEventListener("click", activeIdleCloseHandler);
+          window.addEventListener("click", activeSettingsCloseHandler);
         }
       };
 
@@ -7783,9 +8093,23 @@
           sliderContainer.style.opacity = "0.3";
           slider.setAttribute("disabled", "true");
         }
-
-        updateIdleTagDisplay();
         saveState();
+      };
+
+      window.onWakeLockToggleChange = function () {
+        const checkbox = document.getElementById("wakelock-toggle");
+        state.wakeLockEnabled = checkbox.checked;
+        saveState();
+
+        if (!state.wakeLockEnabled && globalAudioCtx) {
+          // Suspend the audio context immediately if the user turns it off
+          globalAudioCtx.suspend();
+          silentAudioStarted = false;
+          console.log("[WakeLock] Background audio suspended by user.");
+        } else if (state.wakeLockEnabled) {
+          // Reactivate immediately if turned back on
+          startSilentAudio();
+        }
       };
 
       window.onIdleSliderInput = function (val) {
@@ -7794,39 +8118,32 @@
 
       window.onIdleSliderChange = function (val) {
         state.idleThresholdMinutes = parseInt(val, 10);
-        updateIdleTagDisplay();
         saveState();
       };
 
       /**
-       * Executes updateIdleTagDisplay logic.
+       * Executes syncSettingsUI logic to populate the modal with correct saved states.
        */
-      function updateIdleTagDisplay() {
-        const tag = document.getElementById("idle-tag-display");
-        if (!tag) return;
-        if (state.idleTrackingEnabled === false) {
-          tag.textContent = "Idle Off";
-        } else {
-          tag.textContent = `Idle ${state.idleThresholdMinutes || 30}m`;
-        }
-      }
+      function syncSettingsUI() {
+        const isIdleEnabled = state.idleTrackingEnabled !== false;
+        const mins =
+          state.idleThresholdMinutes !== undefined
+            ? state.idleThresholdMinutes
+            : 60;
+        const isWakeLockEnabled = state.wakeLockEnabled === true;
 
-      /**
-       * Executes syncIdleConfigUI logic.
-       */
-      function syncIdleConfigUI() {
-        const isEnabled = state.idleTrackingEnabled !== false;
-        const mins = state.idleThresholdMinutes || 30;
-
-        const checkbox = document.getElementById("idle-toggle");
+        const idleCheckbox = document.getElementById("idle-toggle");
         const sliderContainer = document.getElementById("idle-range-container");
         const slider = document.getElementById("idle-slider");
         const valDisplay = document.getElementById("idle-val-display");
+        const wakeLockCheckbox = document.getElementById("wakelock-toggle");
 
-        if (checkbox) checkbox.checked = isEnabled;
+        if (idleCheckbox) idleCheckbox.checked = isIdleEnabled;
+        if (wakeLockCheckbox) wakeLockCheckbox.checked = isWakeLockEnabled;
+
         if (slider) {
           slider.value = mins;
-          if (isEnabled) {
+          if (isIdleEnabled) {
             sliderContainer.style.opacity = "1";
             slider.removeAttribute("disabled");
           } else {
@@ -7835,7 +8152,6 @@
           }
         }
         if (valDisplay) valDisplay.textContent = mins + "m";
-        updateIdleTagDisplay();
       }
 
       /**
@@ -7951,8 +8267,18 @@
       let globalAudioCtx = null;
 
       function startSilentAudio() {
+        // Abort immediately if the user has disabled this setting in the UI
+        if (state.wakeLockEnabled === false) return;
+
         try {
-          if (silentAudioStarted) return;
+          if (silentAudioStarted) {
+            // If already started but paused by setting toggles, attempt to resume
+            if (globalAudioCtx && globalAudioCtx.state === "suspended") {
+              globalAudioCtx.resume();
+              console.log("[WakeLock] Audio context resumed.");
+            }
+            return;
+          }
 
           const AudioContextClass =
             window.AudioContext || window.webkitAudioContext;
@@ -7962,7 +8288,7 @@
             globalAudioCtx = new AudioContextClass();
           }
 
-          // satisfy the browser's requirement for a direct user gesture
+          // Satisfy the browser's requirement for a direct user gesture
           const resumePromise = globalAudioCtx.resume();
 
           if (!resumePromise) return;
@@ -8210,7 +8536,7 @@
        * Executes getSavedPresets logic.
        */
       function getSavedPresets() {
-        const defaults = [4, 6];
+        const defaults = [6, 10];
         try {
           const saved = localStorage.getItem(PRESET_VALUES_KEY);
           if (!saved) return defaults;
@@ -8819,6 +9145,7 @@
       });
 
       window.addEventListener("beforeunload", (e) => {
+        saveState(); // Guarantee final active seconds are cemented before tab death
         if (state.currentMode !== null) {
           const msg = "Timer is still running! Are you sure you want to leave?";
           e.returnValue = msg;
@@ -8831,22 +9158,43 @@
       /**
        * Executes showSyncToast logic.
        */
-      function showSyncToast(msg) {
+      window.closeSyncToast = function () {
+        const toast = document.getElementById("sync-toast");
+        if (toast) toast.style.top = "-100px";
+      };
+
+      function showSyncToast(msg, requireAck = false) {
         const toast = document.getElementById("sync-toast");
         if (!toast) return;
+
+        // Add a dismiss button if acknowledgement is required
+        let closeBtnHtml = "";
+        if (requireAck) {
+          closeBtnHtml = `
+          <button onclick="closeSyncToast()" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:0 0 0 8px; margin-left:8px; border-left:1px solid var(--border-main); display:flex; align-items:center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        `;
+        }
+
         toast.innerHTML = `
             <div style="display: flex; align-items: center; gap: 12px;">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-warning); flex-shrink: 0;">
                 <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
               </svg>
               <span>${msg}</span>
+              ${closeBtnHtml}
             </div>
           `;
         toast.style.top = "30px";
         clearTimeout(syncToastTimeout);
-        syncToastTimeout = setTimeout(() => {
-          toast.style.top = "-100px";
-        }, 3500);
+
+        // Only set the auto-hide timer if we DO NOT require acknowledgement
+        if (!requireAck) {
+          syncToastTimeout = setTimeout(() => {
+            toast.style.top = "-100px";
+          }, 3500);
+        }
       }
 
       /**
@@ -8874,6 +9222,9 @@
         document.getElementById("confirm-title").textContent = title;
         document.getElementById("confirm-desc").textContent = desc;
         const btn = document.getElementById("confirm-action-btn");
+        const container = document.querySelector(
+          "#confirm-modal .modal-container",
+        );
         if (isDestructive) {
           document.getElementById("confirm-title").style.color =
             "var(--accent-break)";
@@ -8881,6 +9232,7 @@
           btn.style.background = "rgba(248, 113, 113, 0.1)";
           btn.style.borderColor = "rgba(248, 113, 113, 0.3)";
           btn.textContent = "Delete";
+          container.style.borderTopColor = "var(--accent-break)";
         } else {
           document.getElementById("confirm-title").style.color =
             "var(--accent-warning)";
@@ -8888,6 +9240,7 @@
           btn.style.background = "rgba(245, 158, 11, 0.1)";
           btn.style.borderColor = "rgba(245, 158, 11, 0.3)";
           btn.textContent = "Confirm";
+          container.style.borderTopColor = "var(--accent-warning)";
         }
         confirmCallback = callback;
         document.getElementById("confirm-modal").style.display = "flex";
@@ -9097,7 +9450,23 @@
        * Executes saveState logic.
        */
       function saveState() {
-        state.lastHeartbeat = Date.now();
+        const now = Date.now();
+
+        // Permanently cement active uncommitted seconds into the vault on every save
+        // and walk the anchor forward to mathematically prevent any data loss on refresh/crash
+        if (state.sessionAnchorTime && state.currentMode && !state.idleLock) {
+          const deltaSec = Math.max(0, (now - state.sessionAnchorTime) / 1000);
+          if (deltaSec > 0) {
+            if (state.currentMode === "work") {
+              state.workAccumulated += deltaSec;
+            } else if (state.currentMode === "break") {
+              state.breakAccumulated += deltaSec;
+            }
+            state.sessionAnchorTime = now;
+          }
+        }
+
+        state.lastHeartbeat = now;
         state.lastActivity = lastActivity;
         localStorage.setItem(STATE_KEY, JSON.stringify(state));
       }
@@ -9119,6 +9488,18 @@
             return; // state stays at default; app boots clean
           }
           if (state.lastActivity) lastActivity = state.lastActivity;
+
+          const now = Date.now();
+          if (state.sessionAnchorTime && state.sessionAnchorTime > now) {
+            state.sessionAnchorTime = now;
+          }
+          if (state.lastHeartbeat && state.lastHeartbeat > now) {
+            state.lastHeartbeat = now;
+          }
+          if (state.idleStart && state.idleStart > now) {
+            state.idleStart = now;
+          }
+
           const currentDate = getPSTDate();
 
           if (state.activeDate && state.activeDate !== currentDate) {
@@ -9140,8 +9521,47 @@
        */
       (async function initApp() {
         cachedLogs = await loadLogsFromDB();
-        cachedTodayDate = null;
 
+        // FIX 3 RECOVERY: Check if the emergency backup has a shift that IndexedDB missed due to rapid exit
+        try {
+          const emergencyData = localStorage.getItem(
+            "production_logs_emergency_backup",
+          );
+          if (emergencyData) {
+            const emergencyLogs = JSON.parse(emergencyData);
+            if (emergencyLogs.length > 0) {
+              // Check if the most recent emergency log is missing from the main database
+              const latestEmergency = emergencyLogs[0];
+              const isMissing = !cachedLogs.find(
+                (l) =>
+                  l.epochMs === latestEmergency.epochMs &&
+                  l.login === latestEmergency.login,
+              );
+
+              if (isMissing) {
+                console.log("Recovered lost shift(s) from emergency backup!");
+                // Combine them, filter duplicates using a Map, and restore
+                const combined = [...emergencyLogs, ...cachedLogs];
+                const uniqueMap = new Map();
+                combined.forEach((l) =>
+                  uniqueMap.set(
+                    `${l.epochMs}_${l.login}_${l.logout}_${l.workSec}`,
+                    l,
+                  ),
+                ); // Use epoch + login time as unique ID
+                cachedLogs = Array.from(uniqueMap.values());
+
+                // Sort chronologically and resave to the main database properly
+                cachedLogs.sort((a, b) => b.epochMs - a.epochMs);
+                saveLogsToDB(cachedLogs);
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("Emergency backup recovery failed", e);
+        }
+
+        cachedTodayDate = null;
         rebuildWeeklyCache();
         updatePrimaryFormatter();
         displayBaseDate = getPSTDateObj();
@@ -9173,12 +9593,14 @@
         renderTimersOnly();
         renderThemeToggle();
         renderPresets();
-        syncIdleConfigUI();
+        syncSettingsUI();
 
         // Synchronize delta tracking anchor on app launch
         lastTickTime = Date.now();
         lastMonotonicTime = performance.now();
-        tick();
+
+        // Start the background Web Worker timer thread
+        timerWorker.postMessage("start");
       })();
     </script>
   </body>
